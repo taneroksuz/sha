@@ -31,17 +31,23 @@ class SHA
 
     template <class T> T sigma(T x, int t, int k);
 
-    uint32_t K(int t, int k);
+    uint32_t K_1(int t, int k);
+
+    int massage_block_512(uint8_t *in, int length, uint32_t (*massage)[16]);
+
+    int massage_block_1024(uint8_t *in, int length, uint64_t (*massage)[16]);
 
   public:
 
-    void SHA224(uint8_t *in, uint8_t *out);
+    void SHA1(uint8_t *in, int length, uint8_t *out);
 
-    void SHA256(uint8_t *in, uint8_t *out);
+    void SHA224(uint8_t *in, int length, uint8_t *out);
 
-    void SHA384(uint8_t *in, uint8_t *out);
+    void SHA256(uint8_t *in, int length, uint8_t *out);
 
-    void SHA512(uint8_t *in, uint8_t *out);
+    void SHA384(uint8_t *in, int length, uint8_t *out);
+
+    void SHA512(uint8_t *in, int length, uint8_t *out);
 
 };
 

@@ -1,5 +1,7 @@
 #include "sha.h"
 
+using namespace std;
+
 uint32_t K_256[64] = {
 0x428a2f98,0xd807aa98,0xe49b69c1,0x983e5152,0x27b70a85,0xa2bfe8a1,0x19a4c116,0x748f82ee,
 0x71374491,0x12835b01,0xefbe4786,0xa831c66d,0x2e1b2138,0xa81a664b,0x1e376c08,0x78a5636f,
@@ -31,6 +33,73 @@ uint64_t K_512[80] = {
 0x53380d139d95b3df,0x92722c851482353b,0xc76c51a30654be30,0x106aa07032bbd1b8,
 0x34b0bcb5e19b48a8,0x682e6ff3d6b2b8a3,0x8cc702081a6439ec,0xc67178f2e372532b,
 0xf57d4f7fee6ed178,0x1b710b35131c471b,0x431d67c49c100d4c,0x6c44198c4a475817};
+
+uint64_t H_1[5] = {
+0x67452301,
+0xefcdab89,
+0x98badcfe,
+0x10325476,
+0xc3d2e1f0};
+
+uint64_t H_224[8] = {
+0xc1059ed8,
+0x367cd507,
+0x3070dd17,
+0xf70e5939,
+0xffc00b31,
+0x68581511,
+0x64f98fa7,
+0xbefa4fa4};
+
+uint64_t H_256[8] = {
+0x6a09e667,
+0xbb67ae85,
+0x3c6ef372,
+0xa54ff53a,
+0x510e527f,
+0x9b05688c,
+0x1f83d9ab,
+0x5be0cd19};
+
+uint64_t H_384[8] = {
+0xcbbb9d5dc1059ed8,
+0x629a292a367cd507,
+0x9159015a3070dd17,
+0x152fecd8f70e5939,
+0x67332667ffc00b31,
+0x8eb44a8768581511,
+0xdb0c2e0d64f98fa7,
+0x47b5481dbefa4fa4};
+
+uint64_t H_512[8] = {
+0x6a09e667f3bcc908,
+0xbb67ae8584caa73b,
+0x3c6ef372fe94f82b,
+0xa54ff53a5f1d36f1,
+0x510e527fade682d1,
+0x9b05688c2b3e6c1f,
+0x1f83d9abfb41bd6b,
+0x5be0cd19137e2179};
+
+uint64_t H_512_224[8] = {
+0x8C3D37C819544DA2,
+0x73E1996689DCD4D6,
+0x1DFAB7AE32FF9C82,
+0x679DD514582F9FCF,
+0x0F6D2B697BD44DA8,
+0x77E36F7304C48942,
+0x3F9D85A86A1D36C8,
+0x1112E6AD91D692A1};
+
+uint64_t H_512_256[8] = {
+0x22312194FC2BF72C,
+0x9F555FA3C84C64C2,
+0x2393B86B6F53B151,
+0x963877195940EABD,
+0x96283EE2A88EFFE3,
+0xBE5E1E2553863992,
+0x2B0199FC2C85B8AA,
+0x0EB72DDC81C52CA2};
 
 template <class T> T SHA::ROTL(T x, int n)
 {
@@ -139,7 +208,7 @@ template <class T> T SHA::sigma(T x, int t, int k)
     }
 }
 
-uint32_t SHA::K(int t, int k)
+uint32_t SHA::K_1(int t, int k)
 {
     if (t >=0 && t<=19)
     {
@@ -159,22 +228,219 @@ uint32_t SHA::K(int t, int k)
     }
 }
 
-void SHA::SHA224(uint8_t *in, uint8_t *out)
+int SHA::massage_block_512(uint8_t *in, int length, uint32_t (*massage)[16])
 {
-
+    uint8_t word[4];
+    uint32_t w;
+    int index;
+    int rest;
+    int n = 0;
+    int i,j = 0;
+    uint32_t size = 0;
+    bool stop = false;
+    massage = (uint32_t (*)[16]) malloc(sizeof(uint32_t[16]));
+    while(1)
+    {
+        i = 0;
+        while(i<16)
+        {
+            if (stop)
+            {
+                rest = 448 - (i*32 % 512);
+                if (rest > 0)
+                {
+                    w = 0;
+                }
+                else if (rest == 0)
+                {
+                    w = 0;
+                }
+                else
+                {
+                    w = size;
+                }
+            }
+            else
+            {
+                word[0] = 0;
+                word[1] = 0;
+                word[2] = 0;
+                word[3] = 0;
+                j = 0;
+                while(j<4)
+                {
+                    index = 16*n+4*i+j;
+                    if (index == length)
+                    {
+                        word[j] = 0x80;
+                        stop = true;
+                        break;
+                    }
+                    else
+                    {
+                        word[j] = in[index];
+                        size = size + 8;
+                    }
+                    j = j + 1;
+                }
+                w = word[3];
+                w <<= 8;
+                w |= word[2];
+                w <<= 8;
+                w |= word[1];
+                w <<= 8;
+                w |= word[0];
+            }
+            massage[n][i] = w;
+            printf("%08x\n",w);
+            i = i + 1;
+        }
+        if (stop)
+        {
+            break;
+        }
+        else
+        {
+            n = n + 1;
+            massage = (uint32_t (*)[16]) realloc(massage,sizeof(uint32_t[16])*(n+1));
+        }
+    }
+    return n+1;
 }
 
-void SHA::SHA256(uint8_t *in, uint8_t *out)
+int SHA::massage_block_1024(uint8_t *in, int length, uint64_t (*massage)[16])
 {
-
+    uint8_t word[8];
+    uint64_t w;
+    int index;
+    int rest;
+    int n = 0;
+    int i,j = 0;
+    uint64_t size = 0;
+    bool stop = false;
+    massage = (uint64_t (*)[16]) malloc(sizeof(uint64_t[16]));
+    while(1)
+    {
+        i = 0;
+        while(i<16)
+        {
+            if (stop)
+            {
+                rest = 896 - (i*64 % 1024);
+                if (rest > 0)
+                {
+                    w = 0;
+                }
+                else if (rest == 0)
+                {
+                    w = 0;
+                }
+                else
+                {
+                    w = size;
+                }
+            }
+            else
+            {
+                word[0] = 0;
+                word[1] = 0;
+                word[2] = 0;
+                word[3] = 0;
+                word[4] = 0;
+                word[5] = 0;
+                word[6] = 0;
+                word[7] = 0;
+                j = 0;
+                while(j<8)
+                {
+                    index = 16*n+8*i+j;
+                    if (index == length)
+                    {
+                        word[j] = 0x80;
+                        stop = true;
+                        break;
+                    }
+                    else
+                    {
+                        word[j] = in[index];
+                        size = size + 8;
+                    }
+                    j = j + 1;
+                }
+                w = word[7];
+                w <<= 8;
+                w |= word[6];
+                w <<= 8;
+                w |= word[5];
+                w <<= 8;
+                w |= word[4];
+                w <<= 8;
+                w |= word[3];
+                w <<= 8;
+                w |= word[2];
+                w <<= 8;
+                w |= word[1];
+                w <<= 8;
+                w |= word[0];
+            }
+            massage[n][i] = w;
+            printf("%016lx\n",w);
+            i = i + 1;
+        }
+        if (stop)
+        {
+            break;
+        }
+        else
+        {
+            n = n + 1;
+            massage = (uint64_t (*)[16]) realloc(massage,sizeof(uint64_t[16])*(n+1));
+        }
+    }
+    return n+1;
 }
 
-void SHA::SHA384(uint8_t *in, uint8_t *out)
+void SHA::SHA1(uint8_t *in, int length, uint8_t *out)
 {
-
+    int N;
+    uint32_t (*massage)[16];
+    N = massage_block_512(in,length,massage);
+    printf("N: %i\n",N);
+    free(massage);
 }
 
-void SHA::SHA512(uint8_t *in, uint8_t *out)
+void SHA::SHA224(uint8_t *in, int length, uint8_t *out)
 {
+    int N;
+    uint64_t (*massage)[16];
+    N = massage_block_1024(in,length,massage);
+    printf("N: %i\n",N);
+    free(massage);
+}
 
+void SHA::SHA256(uint8_t *in, int length, uint8_t *out)
+{
+    int N;
+    uint64_t (*massage)[16];
+    N = massage_block_1024(in,length,massage);
+    printf("N: %i\n",N);
+    free(massage);
+}
+
+void SHA::SHA384(uint8_t *in, int length, uint8_t *out)
+{
+    int N;
+    uint64_t (*massage)[16];
+    N = massage_block_1024(in,length,massage);
+    printf("N: %i\n",N);
+    free(massage);
+}
+
+void SHA::SHA512(uint8_t *in, int length, uint8_t *out)
+{
+    int N;
+    uint64_t (*massage)[16];
+    N = massage_block_1024(in,length,massage);
+    printf("N: %i\n",N);
+    free(massage);
 }

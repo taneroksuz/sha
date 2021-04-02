@@ -5,7 +5,8 @@ SYSTEMC ?= /opt/systemc
 BASEDIR ?= $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 CYCLES ?= 1000000000
 KLENGTH ?= 256
-NWORDS ?= 100
+DLENGTH ?= 512
+NWORDS ?= 1
 WAVE ?= "" # "wave" for saving dump file
 
 compile:
@@ -14,10 +15,10 @@ compile:
 run:
 	cp -r ${BASEDIR}/py/*.txt ${BASEDIR}/cpp/; \
 	cd ${BASEDIR}/cpp; \
-	./main.o ${KLENGTH} ${NWORDS}
+	./main.o ${KLENGTH} ${DLENGTH} ${NWORDS}
 
 generate:
 	cd ${BASEDIR}/py; \
-	./generate.py -k ${KLENGTH} -w ${NWORDS};
+	./generate.py -k ${KLENGTH} -d ${DLENGTH} -w ${NWORDS};
 
 all: generate simulate

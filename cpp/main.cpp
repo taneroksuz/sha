@@ -64,27 +64,55 @@ void compare(uint8_t *in,uint8_t *out, int num)
 
 int main(int argc, char *argv[])
 {
-  ifstream data_file("data.txt", fstream::in);
-  ifstream hash_file("hash.txt", fstream::in);
+    ifstream data_file("data.txt", fstream::in);
+    ifstream hash_file("hash.txt", fstream::in);
 
-  int K = atoi(argv[1])/8;
-  int W = atoi(argv[2]);
+    int K = atoi(argv[1])/8;
+    int D = atoi(argv[2])/8;
+    int W = atoi(argv[3]);
 
-  uint8_t *dat = (uint8_t *) malloc(K*sizeof(uint8_t));
-  uint8_t *has = (uint8_t *) malloc(K*sizeof(uint8_t));
-  uint8_t *sha = (uint8_t *) malloc(K*sizeof(uint8_t));
+    uint8_t *data = (uint8_t *) malloc(D*sizeof(uint8_t));
+    uint8_t *hash = (uint8_t *) malloc(K*sizeof(uint8_t));
+    uint8_t *res = (uint8_t *) malloc(K*sizeof(uint8_t));
 
-  string data_str;
-  string hash_str;
+    string data_str;
+    string hash_str;
 
-  for (int i=0; i<W; i++)
-  {
-      getline(data_file,data_str);
-      getline(hash_file,hash_str);
-      get(data_str,dat,K);
-      get(hash_str,has,K);
-      compare(dat,has,K);
-  }
+    SHA *s = new SHA();
 
-  return 0;
+    for (int i=0; i<W; i++)
+    {
+        getline(data_file,data_str);
+        getline(hash_file,hash_str);
+        get(data_str,data,D);
+        get(hash_str,hash,K);
+        cout << "Data Length: " << D << endl;
+        cout << "Data: ";
+        for (int i=0; i<D; i++)
+            printf("%02x",data[i]);
+        cout << endl;
+        if (K==20)
+        {
+            s->SHA1(data,D,res);
+        }
+        else if (K==28)
+        {
+            s->SHA224(data,D,res);
+        }
+        else if (K==32)
+        {
+            s->SHA256(data,D,res);
+        }
+        else if (K==48)
+        {
+            s->SHA384(data,D,res);
+        }
+        else if (K==64)
+        {
+            s->SHA512(data,D,res);
+        }
+        compare(hash,res,K);
+    }
+
+    return 0;
 }
