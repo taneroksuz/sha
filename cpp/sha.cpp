@@ -34,14 +34,14 @@ uint64_t K_512[80] = {
 0x34b0bcb5e19b48a8,0x682e6ff3d6b2b8a3,0x8cc702081a6439ec,0xc67178f2e372532b,
 0xf57d4f7fee6ed178,0x1b710b35131c471b,0x431d67c49c100d4c,0x6c44198c4a475817};
 
-uint64_t H_1[5] = {
+uint32_t H_1[5] = {
 0x67452301,
 0xefcdab89,
 0x98badcfe,
 0x10325476,
 0xc3d2e1f0};
 
-uint64_t H_224[8] = {
+uint32_t H_224[8] = {
 0xc1059ed8,
 0x367cd507,
 0x3070dd17,
@@ -51,7 +51,7 @@ uint64_t H_224[8] = {
 0x64f98fa7,
 0xbefa4fa4};
 
-uint64_t H_256[8] = {
+uint32_t H_256[8] = {
 0x6a09e667,
 0xbb67ae85,
 0x3c6ef372,
@@ -140,19 +140,19 @@ template <class T> T SHA::f(T x, T y, T z, int t)
 {
     if (t >=0 && t<=19)
     {
-        return CH(x,y,z);
+        return Ch(x,y,z);
     }
     else if (t >=20 && t<=39)
     {
-        return PARITY(x,y,z);
+        return Parity(x,y,z);
     }
     else if (t >=40 && t<=59)
     {
-        return MAJ(x,y,z);
+        return Maj(x,y,z);
     }
     else
     {
-        return PARITY(x,y,z);
+        return Parity(x,y,z);
     }
 }
 
@@ -208,7 +208,7 @@ template <class T> T SHA::sigma(T x, int t, int k)
     }
 }
 
-uint32_t SHA::K_1(int t, int k)
+uint32_t SHA::K_1(int t)
 {
     if (t >=0 && t<=19)
     {
@@ -228,7 +228,7 @@ uint32_t SHA::K_1(int t, int k)
     }
 }
 
-int SHA::massage_block_512(uint8_t *in, int length, uint32_t (*massage)[16])
+int SHA::massage_block_512(uint8_t *in, int length, uint32_t (**massage)[16])
 {
     uint8_t word[4];
     uint32_t w;
@@ -238,7 +238,7 @@ int SHA::massage_block_512(uint8_t *in, int length, uint32_t (*massage)[16])
     int i,j = 0;
     uint32_t size = 0;
     bool stop = false;
-    massage = (uint32_t (*)[16]) malloc(sizeof(uint32_t[16]));
+    *massage = (uint32_t (*)[16]) malloc(sizeof(uint32_t[16]));
     while(1)
     {
         i = 0;
@@ -291,7 +291,7 @@ int SHA::massage_block_512(uint8_t *in, int length, uint32_t (*massage)[16])
                 w <<= 8;
                 w |= word[0];
             }
-            massage[n][i] = w;
+            (*massage)[n][i] = w;
             printf("%08x\n",w);
             i = i + 1;
         }
@@ -302,13 +302,13 @@ int SHA::massage_block_512(uint8_t *in, int length, uint32_t (*massage)[16])
         else
         {
             n = n + 1;
-            massage = (uint32_t (*)[16]) realloc(massage,sizeof(uint32_t[16])*(n+1));
+            *massage = (uint32_t (*)[16]) realloc(*massage,sizeof(uint32_t[16])*(n+1));
         }
     }
     return n+1;
 }
 
-int SHA::massage_block_1024(uint8_t *in, int length, uint64_t (*massage)[16])
+int SHA::massage_block_1024(uint8_t *in, int length, uint64_t (**massage)[16])
 {
     uint8_t word[8];
     uint64_t w;
@@ -318,7 +318,7 @@ int SHA::massage_block_1024(uint8_t *in, int length, uint64_t (*massage)[16])
     int i,j = 0;
     uint64_t size = 0;
     bool stop = false;
-    massage = (uint64_t (*)[16]) malloc(sizeof(uint64_t[16]));
+    *massage = (uint64_t (*)[16]) malloc(sizeof(uint64_t[16]));
     while(1)
     {
         i = 0;
@@ -383,7 +383,7 @@ int SHA::massage_block_1024(uint8_t *in, int length, uint64_t (*massage)[16])
                 w <<= 8;
                 w |= word[0];
             }
-            massage[n][i] = w;
+            (*massage)[n][i] = w;
             printf("%016lx\n",w);
             i = i + 1;
         }
@@ -394,7 +394,7 @@ int SHA::massage_block_1024(uint8_t *in, int length, uint64_t (*massage)[16])
         else
         {
             n = n + 1;
-            massage = (uint64_t (*)[16]) realloc(massage,sizeof(uint64_t[16])*(n+1));
+            *massage = (uint64_t (*)[16]) realloc(*massage,sizeof(uint64_t[16])*(n+1));
         }
     }
     return n+1;
@@ -403,44 +403,95 @@ int SHA::massage_block_1024(uint8_t *in, int length, uint64_t (*massage)[16])
 void SHA::SHA1(uint8_t *in, int length, uint8_t *out)
 {
     int N;
-    uint32_t (*massage)[16];
-    N = massage_block_512(in,length,massage);
+    uint32_t (*M)[16];
+    uint32_t W[80];
+    uint32_t H[5] = {H_1[0],H_1[1],H_1[2],H_1[3],H_1[4]};
+    N = massage_block_512(in,length,&M);
+    printf("SHA1\n");
     printf("N: %i\n",N);
-    free(massage);
+    for (int i=0; i<N; i++)
+    {
+        printf("Compute 1\n");
+        for (int t=0; t<80; t++)
+        {
+            if (t<16)
+            {
+                W[t] = M[i][t];
+            }
+            else
+            {
+                W[t] = ROTL((W[t-3] ^ W[t-8] ^ W[t-14] ^ W[t-16]),1);
+            }
+        }
+
+        printf("Compute 2\n");
+        uint32_t a = H[0];
+        uint32_t b = H[1];
+        uint32_t c = H[2];
+        uint32_t d = H[3];
+        uint32_t e = H[4];
+
+        printf("Compute 3\n");
+        for (int t=0; t<80; t++)
+        {
+            uint32_t T = ROTL(a,5) + f(b,c,d,t) + e + K_1(t) + W[t];
+            e = d;
+            d = c;
+            c = ROTL(b,30);
+            b = a;
+            a = T;
+        }
+
+        printf("Compute 4\n");
+        H[0] = a + H[0];
+        H[1] = b + H[1];
+        H[2] = c + H[2];
+        H[3] = d + H[3];
+        H[4] = e + H[4];
+    }
+
+    for (int i=0; i<5; i++)
+    {
+        out[4*i] = H[i] & 0xFF;
+        out[4*i+1] = (H[i] >> 8) & 0xFF;
+        out[4*i+2] = (H[i] >> 16)  & 0xFF;
+        out[4*i+3] = (H[i] >> 24)  & 0xFF;
+    }
+    free(M);
 }
 
 void SHA::SHA224(uint8_t *in, int length, uint8_t *out)
 {
     int N;
-    uint64_t (*massage)[16];
-    N = massage_block_1024(in,length,massage);
+    uint64_t (*M)[16];
+    N = massage_block_1024(in,length,&M);
     printf("N: %i\n",N);
-    free(massage);
+    free(M);
 }
 
 void SHA::SHA256(uint8_t *in, int length, uint8_t *out)
 {
     int N;
-    uint64_t (*massage)[16];
-    N = massage_block_1024(in,length,massage);
+    uint64_t (*M)[16];
+    N = massage_block_1024(in,length,&M);
     printf("N: %i\n",N);
-    free(massage);
+    free(M);
 }
 
 void SHA::SHA384(uint8_t *in, int length, uint8_t *out)
 {
     int N;
-    uint64_t (*massage)[16];
-    N = massage_block_1024(in,length,massage);
+    uint64_t (*M)[16];
+    N = massage_block_1024(in,length,&M);
     printf("N: %i\n",N);
-    free(massage);
+    free(M);
 }
 
 void SHA::SHA512(uint8_t *in, int length, uint8_t *out)
 {
     int N;
-    uint64_t (*massage)[16];
-    N = massage_block_1024(in,length,massage);
+    uint64_t (*M)[16];
+    N = massage_block_1024(in,length,&M);
     printf("N: %i\n",N);
-    free(massage);
+    free(M);
 }
