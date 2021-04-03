@@ -32,6 +32,14 @@ void get(string in,uint8_t *out, int num)
     }
 }
 
+void get_string(string in,uint8_t *out, int num)
+{
+    for (int i=0; i<num; i=i+1)
+    {
+        out[i] = (uint8_t) in[i];
+    }
+}
+
 void compare(uint8_t *in,uint8_t *out, int num)
 {
     bool res = true;
@@ -68,7 +76,7 @@ int main(int argc, char *argv[])
     ifstream hash_file("hash.txt", fstream::in);
 
     int K = atoi(argv[1])/8;
-    int D = atoi(argv[2])/8;
+    int D = atoi(argv[2]);
     int W = atoi(argv[3]);
 
     uint8_t *data = (uint8_t *) malloc(D*sizeof(uint8_t));
@@ -84,7 +92,7 @@ int main(int argc, char *argv[])
     {
         getline(data_file,data_str);
         getline(hash_file,hash_str);
-        get(data_str,data,D);
+        get_string(data_str,data,D);
         get(hash_str,hash,K);
         cout << "Data Length: " << D << endl;
         cout << "Data: ";
@@ -111,7 +119,7 @@ int main(int argc, char *argv[])
         {
             s->SHA512(data,D,res);
         }
-        compare(hash,res,K);
+        compare(res,hash,K);
     }
 
     return 0;

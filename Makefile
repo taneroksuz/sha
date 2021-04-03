@@ -5,7 +5,7 @@ SYSTEMC ?= /opt/systemc
 BASEDIR ?= $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 CYCLES ?= 1000000000
 KLENGTH ?= 160
-DLENGTH ?= 512
+DLENGTH ?= 64
 NWORDS ?= 1
 WAVE ?= "" # "wave" for saving dump file
 
