@@ -119,6 +119,7 @@ int main(int argc, char *argv[])
         {
             s->SHA512(data,D,res);
         }
+        cout << "Key Length: " << K << endl;
         compare(res,hash,K);
     }
 

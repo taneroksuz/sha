@@ -29,7 +29,7 @@ if (args.word_number is None) or (args.word_number<1):
 d = open("data.txt", "w")
 e = open("hash.txt", "w")
 for i in range(args.word_number):
-    data = ''.join(random.choices(string.ascii_letters + string.digits + string.punctuation, k=args.data_length))
+    data = ''.join(random.choices(string.ascii_letters + string.digits, k=args.data_length))
     if args.key_length == 160:
         hash = hashlib.sha1(data.encode('ascii'))
     elif args.key_length == 224:
