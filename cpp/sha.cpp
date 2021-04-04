@@ -443,7 +443,6 @@ void SHA::SHA224(uint8_t *in, int length, uint8_t *out)
     uint32_t W[64];
     uint32_t H[8] = {H_224[0],H_224[1],H_224[2],H_224[3],H_224[4],H_224[5],H_224[6],H_224[7]};
     N = massage_block_512(in,length,&M);
-    printf("N: %i\n",N);
     for (int i=0; i<N; i++)
     {
         for (int t=0; t<64; t++)
@@ -509,7 +508,6 @@ void SHA::SHA256(uint8_t *in, int length, uint8_t *out)
     uint32_t W[64];
     uint32_t H[8] = {H_256[0],H_256[1],H_256[2],H_256[3],H_256[4],H_256[5],H_256[6],H_256[7]};
     N = massage_block_512(in,length,&M);
-    printf("N: %i\n",N);
     for (int i=0; i<N; i++)
     {
         for (int t=0; t<64; t++)
@@ -575,7 +573,6 @@ void SHA::SHA384(uint8_t *in, int length, uint8_t *out)
     uint64_t W[80];
     uint64_t H[8] = {H_384[0],H_384[1],H_384[2],H_384[3],H_384[4],H_384[5],H_384[6],H_384[7]};
     N = massage_block_1024(in,length,&M);
-    printf("N: %i\n",N);
     for (int i=0; i<N; i++)
     {
         for (int t=0; t<80; t++)
@@ -645,7 +642,6 @@ void SHA::SHA512(uint8_t *in, int length, uint8_t *out)
     uint64_t W[80];
     uint64_t H[8] = {H_512[0],H_512[1],H_512[2],H_512[3],H_512[4],H_512[5],H_512[6],H_512[7]};
     N = massage_block_1024(in,length,&M);
-    printf("N: %i\n",N);
     for (int i=0; i<N; i++)
     {
         for (int t=0; t<80; t++)
@@ -715,7 +711,6 @@ void SHA::SHA512_224(uint8_t *in, int length, uint8_t *out)
     uint64_t W[80];
     uint64_t H[8] = {H_512_224[0],H_512_224[1],H_512_224[2],H_512_224[3],H_512_224[4],H_512_224[5],H_512_224[6],H_512_224[7]};
     N = massage_block_1024(in,length,&M);
-    printf("N: %i\n",N);
     for (int i=0; i<N; i++)
     {
         for (int t=0; t<80; t++)
@@ -791,7 +786,6 @@ void SHA::SHA512_256(uint8_t *in, int length, uint8_t *out)
     uint64_t W[80];
     uint64_t H[8] = {H_512_256[0],H_512_256[1],H_512_256[2],H_512_256[3],H_512_256[4],H_512_256[5],H_512_256[6],H_512_256[7]};
     N = massage_block_1024(in,length,&M);
-    printf("N: %i\n",N);
     for (int i=0; i<N; i++)
     {
         for (int t=0; t<80; t++)

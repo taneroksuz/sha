@@ -6,7 +6,7 @@ BASEDIR ?= $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 CYCLES ?= 1000000000
 KLENGTH ?= 256
 DLENGTH ?= 64
-NWORDS ?= 1
+NWORDS ?= 100
 WAVE ?= "" # "wave" for saving dump file
 
 compile:
