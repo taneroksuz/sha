@@ -439,18 +439,132 @@ void SHA::SHA1(uint8_t *in, int length, uint8_t *out)
 void SHA::SHA224(uint8_t *in, int length, uint8_t *out)
 {
     int N;
-    uint64_t (*M)[16];
-    N = massage_block_1024(in,length,&M);
+    uint32_t (*M)[16];
+    uint32_t W[64];
+    uint32_t H[8] = {H_224[0],H_224[1],H_224[2],H_224[3],H_224[4],H_224[5],H_224[6],H_224[7]};
+    N = massage_block_512(in,length,&M);
     printf("N: %i\n",N);
+    for (int i=0; i<N; i++)
+    {
+        for (int t=0; t<64; t++)
+        {
+            if (t<16)
+            {
+                W[t] = M[i][t];
+            }
+            else
+            {
+                W[t] = sigma1_256(W[t-2]) + W[t-7] + sigma0_256(W[t-15]) + W[t-16];
+            }
+        }
+
+        uint32_t a = H[0];
+        uint32_t b = H[1];
+        uint32_t c = H[2];
+        uint32_t d = H[3];
+        uint32_t e = H[4];
+        uint32_t f = H[5];
+        uint32_t g = H[6];
+        uint32_t h = H[7];
+
+        for (int t=0; t<64; t++)
+        {
+            uint32_t T1 = h + SIGMA1_256(e) + Ch(e,f,g)+ K_256[t] + W[t];
+            uint32_t T2 = SIGMA0_256(a) + Maj(a,b,c);
+            h = g;
+            g = f;
+            f = e;
+            e = d + T1;
+            d = c;
+            c = b;
+            b = a;
+            a = T1 + T2;
+        }
+
+        H[0] = a + H[0];
+        H[1] = b + H[1];
+        H[2] = c + H[2];
+        H[3] = d + H[3];
+        H[4] = e + H[4];
+        H[5] = f + H[5];
+        H[6] = g + H[6];
+        H[7] = h + H[7];
+    }
+
+    for (int i=0; i<7; i++)
+    {
+        out[4*i] = (H[i] >> 24)  & 0xFF;
+        out[4*i+1] = (H[i] >> 16)  & 0xFF;
+        out[4*i+2] = (H[i] >> 8)  & 0xFF;
+        out[4*i+3] = H[i]  & 0xFF;
+    }
+
     free(M);
 }
 
 void SHA::SHA256(uint8_t *in, int length, uint8_t *out)
 {
     int N;
-    uint64_t (*M)[16];
-    N = massage_block_1024(in,length,&M);
+    uint32_t (*M)[16];
+    uint32_t W[64];
+    uint32_t H[8] = {H_256[0],H_256[1],H_256[2],H_256[3],H_256[4],H_256[5],H_256[6],H_256[7]};
+    N = massage_block_512(in,length,&M);
     printf("N: %i\n",N);
+    for (int i=0; i<N; i++)
+    {
+        for (int t=0; t<64; t++)
+        {
+            if (t<16)
+            {
+                W[t] = M[i][t];
+            }
+            else
+            {
+                W[t] = sigma1_256(W[t-2]) + W[t-7] + sigma0_256(W[t-15]) + W[t-16];
+            }
+        }
+
+        uint32_t a = H[0];
+        uint32_t b = H[1];
+        uint32_t c = H[2];
+        uint32_t d = H[3];
+        uint32_t e = H[4];
+        uint32_t f = H[5];
+        uint32_t g = H[6];
+        uint32_t h = H[7];
+
+        for (int t=0; t<64; t++)
+        {
+            uint32_t T1 = h + SIGMA1_256(e) + Ch(e,f,g)+ K_256[t] + W[t];
+            uint32_t T2 = SIGMA0_256(a) + Maj(a,b,c);
+            h = g;
+            g = f;
+            f = e;
+            e = d + T1;
+            d = c;
+            c = b;
+            b = a;
+            a = T1 + T2;
+        }
+
+        H[0] = a + H[0];
+        H[1] = b + H[1];
+        H[2] = c + H[2];
+        H[3] = d + H[3];
+        H[4] = e + H[4];
+        H[5] = f + H[5];
+        H[6] = g + H[6];
+        H[7] = h + H[7];
+    }
+
+    for (int i=0; i<8; i++)
+    {
+        out[4*i] = (H[i] >> 24)  & 0xFF;
+        out[4*i+1] = (H[i] >> 16)  & 0xFF;
+        out[4*i+2] = (H[i] >> 8)  & 0xFF;
+        out[4*i+3] = H[i]  & 0xFF;
+    }
+
     free(M);
 }
 
@@ -580,6 +694,152 @@ void SHA::SHA512(uint8_t *in, int length, uint8_t *out)
     }
 
     for (int i=0; i<8; i++)
+    {
+        out[8*i] = (H[i] >> 56)  & 0xFF;
+        out[8*i+1] = (H[i] >> 48)  & 0xFF;
+        out[8*i+2] = (H[i] >> 40)  & 0xFF;
+        out[8*i+3] = (H[i] >> 32)  & 0xFF;
+        out[8*i+4] = (H[i] >> 24)  & 0xFF;
+        out[8*i+5] = (H[i] >> 16)  & 0xFF;
+        out[8*i+6] = (H[i] >> 8)  & 0xFF;
+        out[8*i+7] = H[i]  & 0xFF;
+    }
+
+    free(M);
+}
+
+void SHA::SHA512_224(uint8_t *in, int length, uint8_t *out)
+{
+    int N;
+    uint64_t (*M)[16];
+    uint64_t W[80];
+    uint64_t H[8] = {H_512_224[0],H_512_224[1],H_512_224[2],H_512_224[3],H_512_224[4],H_512_224[5],H_512_224[6],H_512_224[7]};
+    N = massage_block_1024(in,length,&M);
+    printf("N: %i\n",N);
+    for (int i=0; i<N; i++)
+    {
+        for (int t=0; t<80; t++)
+        {
+            if (t<16)
+            {
+                W[t] = M[i][t];
+            }
+            else
+            {
+                W[t] = sigma1_512(W[t-2]) + W[t-7] + sigma0_512(W[t-15]) + W[t-16];
+            }
+        }
+
+        uint64_t a = H[0];
+        uint64_t b = H[1];
+        uint64_t c = H[2];
+        uint64_t d = H[3];
+        uint64_t e = H[4];
+        uint64_t f = H[5];
+        uint64_t g = H[6];
+        uint64_t h = H[7];
+
+        for (int t=0; t<80; t++)
+        {
+            uint64_t T1 = h + SIGMA1_512(e) + Ch(e,f,g)+ K_512[t] + W[t];
+            uint64_t T2 = SIGMA0_512(a) + Maj(a,b,c);
+            h = g;
+            g = f;
+            f = e;
+            e = d + T1;
+            d = c;
+            c = b;
+            b = a;
+            a = T1 + T2;
+        }
+
+        H[0] = a + H[0];
+        H[1] = b + H[1];
+        H[2] = c + H[2];
+        H[3] = d + H[3];
+        H[4] = e + H[4];
+        H[5] = f + H[5];
+        H[6] = g + H[6];
+        H[7] = h + H[7];
+    }
+
+    for (int i=0; i<3; i++)
+    {
+        out[8*i] = (H[i] >> 56)  & 0xFF;
+        out[8*i+1] = (H[i] >> 48)  & 0xFF;
+        out[8*i+2] = (H[i] >> 40)  & 0xFF;
+        out[8*i+3] = (H[i] >> 32)  & 0xFF;
+        out[8*i+4] = (H[i] >> 24)  & 0xFF;
+        out[8*i+5] = (H[i] >> 16)  & 0xFF;
+        out[8*i+6] = (H[i] >> 8)  & 0xFF;
+        out[8*i+7] = H[i]  & 0xFF;
+    }
+
+    out[24] = (H[3] >> 56)  & 0xFF;
+    out[25] = (H[3] >> 48)  & 0xFF;
+    out[26] = (H[3] >> 40)  & 0xFF;
+    out[27] = (H[3] >> 32)  & 0xFF;
+
+    free(M);
+}
+
+
+void SHA::SHA512_256(uint8_t *in, int length, uint8_t *out)
+{
+    int N;
+    uint64_t (*M)[16];
+    uint64_t W[80];
+    uint64_t H[8] = {H_512_256[0],H_512_256[1],H_512_256[2],H_512_256[3],H_512_256[4],H_512_256[5],H_512_256[6],H_512_256[7]};
+    N = massage_block_1024(in,length,&M);
+    printf("N: %i\n",N);
+    for (int i=0; i<N; i++)
+    {
+        for (int t=0; t<80; t++)
+        {
+            if (t<16)
+            {
+                W[t] = M[i][t];
+            }
+            else
+            {
+                W[t] = sigma1_512(W[t-2]) + W[t-7] + sigma0_512(W[t-15]) + W[t-16];
+            }
+        }
+
+        uint64_t a = H[0];
+        uint64_t b = H[1];
+        uint64_t c = H[2];
+        uint64_t d = H[3];
+        uint64_t e = H[4];
+        uint64_t f = H[5];
+        uint64_t g = H[6];
+        uint64_t h = H[7];
+
+        for (int t=0; t<80; t++)
+        {
+            uint64_t T1 = h + SIGMA1_512(e) + Ch(e,f,g)+ K_512[t] + W[t];
+            uint64_t T2 = SIGMA0_512(a) + Maj(a,b,c);
+            h = g;
+            g = f;
+            f = e;
+            e = d + T1;
+            d = c;
+            c = b;
+            b = a;
+            a = T1 + T2;
+        }
+
+        H[0] = a + H[0];
+        H[1] = b + H[1];
+        H[2] = c + H[2];
+        H[3] = d + H[3];
+        H[4] = e + H[4];
+        H[5] = f + H[5];
+        H[6] = g + H[6];
+        H[7] = h + H[7];
+    }
+
+    for (int i=0; i<4; i++)
     {
         out[8*i] = (H[i] >> 56)  & 0xFF;
         out[8*i+1] = (H[i] >> 48)  & 0xFF;
