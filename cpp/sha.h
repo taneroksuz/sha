@@ -45,9 +45,7 @@ class SHA
 
     uint32_t K_1(int t);
 
-    int massage_block_512(uint8_t *in, int length, uint32_t (**massage)[16]);
-
-    int massage_block_1024(uint8_t *in, int length, uint64_t (**massage)[16]);
+    template <class T> int massage_block(uint8_t *in, int length, T **massage);
 
   public:
 

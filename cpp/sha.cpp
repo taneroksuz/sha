@@ -212,17 +212,17 @@ uint32_t SHA::K_1(int t)
     }
 }
 
-int SHA::massage_block_512(uint8_t *in, int length, uint32_t (**massage)[16])
+template <class T> int SHA::massage_block(uint8_t *in, int length, T **massage)
 {
-    uint8_t word[4];
-    uint32_t w;
+    uint8_t word[sizeof(T)];
+    T w;
     int rest;
     int index = 0;
     int n = 0;
     int i,j = 0;
-    uint32_t size = 0;
+    T size = 0;
     bool stop = false;
-    *massage = (uint32_t (*)[16]) malloc(sizeof(uint32_t[16]));
+    *massage = (T *) malloc(16*sizeof(T));
     while(1)
     {
         i = 0;
@@ -230,7 +230,7 @@ int SHA::massage_block_512(uint8_t *in, int length, uint32_t (**massage)[16])
         {
             if (stop)
             {
-                rest = 448 - (i*32 % 512);
+                rest = (112*sizeof(T)) - ((8*sizeof(T)*i) % (128*sizeof(T)));
                 if (rest > 0)
                 {
                     w = 0;
@@ -246,12 +246,14 @@ int SHA::massage_block_512(uint8_t *in, int length, uint32_t (**massage)[16])
             }
             else
             {
-                word[0] = 0;
-                word[1] = 0;
-                word[2] = 0;
-                word[3] = 0;
                 j = 0;
-                while(j<4)
+                while(j<sizeof(T))
+                {
+                    word[j] = 0;
+                    j = j + 1;
+                }
+                j = 0;
+                while(j<sizeof(T))
                 {
                     if (index == length)
                     {
@@ -268,105 +270,15 @@ int SHA::massage_block_512(uint8_t *in, int length, uint32_t (**massage)[16])
                     index = index + 1;
                 }
                 w = word[0];
-                w <<= 8;
-                w |= word[1];
-                w <<= 8;
-                w |= word[2];
-                w <<= 8;
-                w |= word[3];
-            }
-            (*massage)[n][i] = w;
-            i = i + 1;
-        }
-        if (stop)
-        {
-            break;
-        }
-        else
-        {
-            n = n + 1;
-            *massage = (uint32_t (*)[16]) realloc(*massage,sizeof(uint32_t[16])*(n+1));
-        }
-    }
-    return n+1;
-}
-
-int SHA::massage_block_1024(uint8_t *in, int length, uint64_t (**massage)[16])
-{
-    uint8_t word[8];
-    uint64_t w;
-    int rest;
-    int index = 0;
-    int n = 0;
-    int i,j = 0;
-    uint64_t size = 0;
-    bool stop = false;
-    *massage = (uint64_t (*)[16]) malloc(sizeof(uint64_t[16]));
-    while(1)
-    {
-        i = 0;
-        while(i<16)
-        {
-            if (stop)
-            {
-                rest = 896 - (i*64 % 1024);
-                if (rest > 0)
+                j = 1;
+                while(j<sizeof(T))
                 {
-                    w = 0;
-                }
-                else if (rest == 0)
-                {
-                    w = 0;
-                }
-                else
-                {
-                    w = size;
-                }
-            }
-            else
-            {
-                word[0] = 0;
-                word[1] = 0;
-                word[2] = 0;
-                word[3] = 0;
-                word[4] = 0;
-                word[5] = 0;
-                word[6] = 0;
-                word[7] = 0;
-                j = 0;
-                while(j<8)
-                {
-                    if (index == length)
-                    {
-                        word[j] = 0x80;
-                        stop = true;
-                        break;
-                    }
-                    else
-                    {
-                        word[j] = in[index];
-                        size = size + 8;
-                    }
+                    w <<= 8;
+                    w |= word[j];
                     j = j + 1;
-                    index = index + 1;
                 }
-                w = word[0];
-                w <<= 8;
-                w |= word[1];
-                w <<= 8;
-                w |= word[2];
-                w <<= 8;
-                w |= word[3];
-                w <<= 8;
-                w |= word[4];
-                w <<= 8;
-                w |= word[5];
-                w <<= 8;
-                w |= word[6];
-                w <<= 8;
-                w |= word[7];
             }
-            (*massage)[n][i] = w;
+            (*massage)[16*n+i] = w;
             i = i + 1;
         }
         if (stop)
@@ -376,7 +288,7 @@ int SHA::massage_block_1024(uint8_t *in, int length, uint64_t (**massage)[16])
         else
         {
             n = n + 1;
-            *massage = (uint64_t (*)[16]) realloc(*massage,sizeof(uint64_t[16])*(n+1));
+            *massage = (T *) realloc(*massage,16*sizeof(T)*(n+1));
         }
     }
     return n+1;
@@ -385,17 +297,17 @@ int SHA::massage_block_1024(uint8_t *in, int length, uint64_t (**massage)[16])
 void SHA::SHA1(uint8_t *in, int length, uint8_t *out)
 {
     int N;
-    uint32_t (*M)[16];
+    uint32_t *M;
     uint32_t W[80];
     uint32_t H[5] = {H_1[0],H_1[1],H_1[2],H_1[3],H_1[4]};
-    N = massage_block_512(in,length,&M);
+    N = massage_block(in,length,&M);
     for (int i=0; i<N; i++)
     {
         for (int t=0; t<80; t++)
         {
             if (t<16)
             {
-                W[t] = M[i][t];
+                W[t] = M[16*i+t];
             }
             else
             {
@@ -439,17 +351,17 @@ void SHA::SHA1(uint8_t *in, int length, uint8_t *out)
 void SHA::SHA224(uint8_t *in, int length, uint8_t *out)
 {
     int N;
-    uint32_t (*M)[16];
+    uint32_t *M;
     uint32_t W[64];
     uint32_t H[8] = {H_224[0],H_224[1],H_224[2],H_224[3],H_224[4],H_224[5],H_224[6],H_224[7]};
-    N = massage_block_512(in,length,&M);
+    N = massage_block(in,length,&M);
     for (int i=0; i<N; i++)
     {
         for (int t=0; t<64; t++)
         {
             if (t<16)
             {
-                W[t] = M[i][t];
+                W[t] = M[16*i+t];
             }
             else
             {
@@ -504,17 +416,17 @@ void SHA::SHA224(uint8_t *in, int length, uint8_t *out)
 void SHA::SHA256(uint8_t *in, int length, uint8_t *out)
 {
     int N;
-    uint32_t (*M)[16];
+    uint32_t *M;
     uint32_t W[64];
     uint32_t H[8] = {H_256[0],H_256[1],H_256[2],H_256[3],H_256[4],H_256[5],H_256[6],H_256[7]};
-    N = massage_block_512(in,length,&M);
+    N = massage_block(in,length,&M);
     for (int i=0; i<N; i++)
     {
         for (int t=0; t<64; t++)
         {
             if (t<16)
             {
-                W[t] = M[i][t];
+                W[t] = M[16*i+t];
             }
             else
             {
@@ -569,17 +481,17 @@ void SHA::SHA256(uint8_t *in, int length, uint8_t *out)
 void SHA::SHA384(uint8_t *in, int length, uint8_t *out)
 {
     int N;
-    uint64_t (*M)[16];
+    uint64_t *M;
     uint64_t W[80];
     uint64_t H[8] = {H_384[0],H_384[1],H_384[2],H_384[3],H_384[4],H_384[5],H_384[6],H_384[7]};
-    N = massage_block_1024(in,length,&M);
+    N = massage_block(in,length,&M);
     for (int i=0; i<N; i++)
     {
         for (int t=0; t<80; t++)
         {
             if (t<16)
             {
-                W[t] = M[i][t];
+                W[t] = M[16*i+t];
             }
             else
             {
@@ -638,17 +550,17 @@ void SHA::SHA384(uint8_t *in, int length, uint8_t *out)
 void SHA::SHA512(uint8_t *in, int length, uint8_t *out)
 {
     int N;
-    uint64_t (*M)[16];
+    uint64_t *M;
     uint64_t W[80];
     uint64_t H[8] = {H_512[0],H_512[1],H_512[2],H_512[3],H_512[4],H_512[5],H_512[6],H_512[7]};
-    N = massage_block_1024(in,length,&M);
+    N = massage_block(in,length,&M);
     for (int i=0; i<N; i++)
     {
         for (int t=0; t<80; t++)
         {
             if (t<16)
             {
-                W[t] = M[i][t];
+                W[t] = M[16*i+t];
             }
             else
             {
@@ -707,17 +619,17 @@ void SHA::SHA512(uint8_t *in, int length, uint8_t *out)
 void SHA::SHA512_224(uint8_t *in, int length, uint8_t *out)
 {
     int N;
-    uint64_t (*M)[16];
+    uint64_t *M;
     uint64_t W[80];
     uint64_t H[8] = {H_512_224[0],H_512_224[1],H_512_224[2],H_512_224[3],H_512_224[4],H_512_224[5],H_512_224[6],H_512_224[7]};
-    N = massage_block_1024(in,length,&M);
+    N = massage_block(in,length,&M);
     for (int i=0; i<N; i++)
     {
         for (int t=0; t<80; t++)
         {
             if (t<16)
             {
-                W[t] = M[i][t];
+                W[t] = M[16*i+t];
             }
             else
             {
@@ -782,17 +694,17 @@ void SHA::SHA512_224(uint8_t *in, int length, uint8_t *out)
 void SHA::SHA512_256(uint8_t *in, int length, uint8_t *out)
 {
     int N;
-    uint64_t (*M)[16];
+    uint64_t *M;
     uint64_t W[80];
     uint64_t H[8] = {H_512_256[0],H_512_256[1],H_512_256[2],H_512_256[3],H_512_256[4],H_512_256[5],H_512_256[6],H_512_256[7]};
-    N = massage_block_1024(in,length,&M);
+    N = massage_block(in,length,&M);
     for (int i=0; i<N; i++)
     {
         for (int t=0; t<80; t++)
         {
             if (t<16)
             {
-                W[t] = M[i][t];
+                W[t] = M[16*i+t];
             }
             else
             {
