@@ -27,25 +27,15 @@ class SHA
 
     template <class T> T f(T x, T y, T z, int t);
 
-    template <class T> T SIGMA0_256(T x);
+    template <class T> T SIGMA(T x, int t, int k);
 
-    template <class T> T SIGMA1_256(T x);
-
-    template <class T> T SIGMA0_512(T x);
-
-    template <class T> T SIGMA1_512(T x);
-
-    template <class T> T sigma0_256(T x);
-
-    template <class T> T sigma1_256(T x);
-
-    template <class T> T sigma0_512(T x);
-
-    template <class T> T sigma1_512(T x);
+    template <class T> T sigma(T x, int t, int k);
 
     uint32_t K_1(int t);
 
     template <class T> int massage_block(uint8_t *in, int length, T **massage);
+
+    template <class T> void SHA_ALGORITHM(int N, T *H, T *M, T *K);
 
   public:
 
