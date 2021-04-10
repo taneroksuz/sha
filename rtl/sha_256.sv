@@ -5,19 +5,80 @@ module sha_256
   input logic rst,
   input logic clk,
   input logic [511:0] Data,
+  input logic [63:0] Index,
+  input logic [0:0] Operation,
   input logic [0:0] Enable,
   output logic [255:0] Hash,
-  output logic [0:0] Enable
+  output logic [0:0] Ready
 );
   timeunit 1ns;
   timeprecision 1ps;
 
   logic [31 : 0] K [0:63];
-
+  logic [31 : 0] W [0:63];
+  logic [31 : 0] R [0:7];
   logic [31 : 0] H [0:7];
 
   logic [31 : 0] H_224 [0:7];
   logic [31 : 0] H_256 [0:7];
+
+  function [31:0] ROTR;
+    input logic [31:0] x;
+    input logic [4:0] n;
+    begin
+      ROTR = (x >> n) | (x << (32-n));
+    end
+  endfunction
+
+  function [31:0] SHR;
+    input logic [31:0] x;
+    input logic [4:0] n;
+    begin
+      SHR = x >> n;
+    end
+  endfunction
+
+  function [31:0] CH;
+    input logic [31:0] x;
+    input logic [31:0] y;
+    input logic [31:0] z;
+    begin
+      CH = (x & y) ^ ((~x) & z);
+    end
+  endfunction
+
+  function [31:0] MAJ;
+    input logic [31:0] x;
+    input logic [31:0] y;
+    input logic [31:0] z;
+    begin
+      MAJ = (x & y) ^ (x & z) ^ (y & z);
+    end
+  endfunction
+
+  function [31:0] BIGSIGMA;
+    input logic [31:0] x;
+    input logic [0:0] t;
+    begin
+      if (t==0) begin
+        BIGSIGMA = ROTR(x,2) ^ ROTR(x,13) ^ ROTR(x,22);
+      end else begin
+        BIGSIGMA = ROTR(x,6) ^ ROTR(x,11) ^ ROTR(x,25);
+      end
+    end
+  endfunction
+
+  function [31:0] SMALLSIGMA;
+    input logic [31:0] x;
+    input logic [0:0] t;
+    begin
+      if (t==0) begin
+        SMALLSIGMA = ROTR(x,7) ^ ROTR(x,18) ^ SHR(x,3);
+      end else begin
+        SMALLSIGMA = ROTR(x,17) ^ ROTR(x,19) ^ SHR(x,10);
+      end
+    end
+  endfunction
 
   initial begin
 
@@ -36,6 +97,16 @@ module sha_256
   end
 
   always_comb begin
+
+    if (Enable == 1) begin
+      if (Index == 0) begin
+        if (Operation == 0) begin
+          H = H_224;
+        end else if (Operation == 1) begin
+          H = H_256;
+        end
+      end
+    end
 
   end
 

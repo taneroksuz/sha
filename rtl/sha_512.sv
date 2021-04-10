@@ -5,21 +5,82 @@ module sha_512
   input logic rst,
   input logic clk,
   input logic [1023:0] Data,
+  input logic [127:0] Index,
+  input logic [1:0] Operation,
   input logic [0:0] Enable,
   output logic [511:0] Hash,
-  output logic [0:0] Enable
+  output logic [0:0] Ready
 );
   timeunit 1ns;
   timeprecision 1ps;
 
   logic [63 : 0] K [0:79];
-
+  logic [63 : 0] W [0:79];
+  logic [63 : 0] R [0:7];
   logic [63 : 0] H [0:7];
 
   logic [63 : 0] H_224 [0:7];
   logic [63 : 0] H_256 [0:7];
   logic [63 : 0] H_384 [0:7];
   logic [63 : 0] H_512 [0:7];
+
+  function [63:0] ROTR;
+    input logic [63:0] x;
+    input logic [5:0] n;
+    begin
+      ROTR = (x >> n) | (x << (64-n));
+    end
+  endfunction
+
+  function [63:0] SHR;
+    input logic [63:0] x;
+    input logic [5:0] n;
+    begin
+      SHR = x >> n;
+    end
+  endfunction
+
+  function [63:0] CH;
+    input logic [63:0] x;
+    input logic [63:0] y;
+    input logic [63:0] z;
+    begin
+      CH = (x & y) ^ ((~x) & z);
+    end
+  endfunction
+
+  function [63:0] MAJ;
+    input logic [63:0] x;
+    input logic [63:0] y;
+    input logic [63:0] z;
+    begin
+      MAJ = (x & y) ^ (x & z) ^ (y & z);
+    end
+  endfunction
+
+  function [63:0] BIGSIGMA;
+    input logic [63:0] x;
+    input logic [0:0] t;
+    begin
+      if (t==0) begin
+        BIGSIGMA = ROTR(x,28) ^ ROTR(x,34) ^ ROTR(x,39);
+      end else begin
+        BIGSIGMA = ROTR(x,14) ^ ROTR(x,18) ^ ROTR(x,41);
+      end
+    end
+  endfunction
+
+  function [63:0] SMALLSIGMA;
+    input logic [63:0] x;
+    input logic [0:0] t;
+    begin
+      if (t==0) begin
+        SMALLSIGMA = ROTR(x,1) ^ ROTR(x,8) ^ SHR(x,7);
+      end else begin
+        SMALLSIGMA = ROTR(x,19) ^ ROTR(x,61) ^ SHR(x,6);
+      end
+    end
+  endfunction
 
   initial begin
 
@@ -48,6 +109,20 @@ module sha_512
   end
 
   always_comb begin
+
+    if (Enable == 1) begin
+      if (Index == 0) begin
+        if (Operation == 0) begin
+          H = H_224;
+        end else if (Operation == 1) begin
+          H = H_256;
+        end else if (Operation == 2) begin
+          H = H_384;
+        end else if (Operation == 3) begin
+          H = H_512;
+        end
+      end
+    end
 
   end
 
