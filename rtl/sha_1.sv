@@ -31,11 +31,13 @@ module sha_1
   typedef struct packed{
     logic [6 : 0] iter;
     logic [1 : 0] state;
+    logic [0 : 0] ready;
   } reg_type;
 
   reg_type init_reg = '{
     iter : 0,
-    state : IDLE
+    state : IDLE,
+    ready : 0
   };
 
   reg_type r,rin;
@@ -122,17 +124,21 @@ module sha_1
     if (r.state == IDLE) begin
 
       if (Enable == 1) begin
+
         if (Index == 0) begin
           H = H_1;
         end
+
+        for (i=0; i<16; i=i+1) begin
+          D[i] = Data[(32*(i+1)-1):(32*(i))];
+        end
+
+        v.iter = 0;
+        v.state = INIT;
+
       end
 
-      for (i=0; i<16; i=i+1) begin
-        D[i] = Data[(32*(i+1)-1):(32*(i))];
-      end
-
-      v.iter = 0;
-      v.state = INIT;
+      v.ready = 0;
 
     end else if (r.state == INIT) begin
 
@@ -157,6 +163,8 @@ module sha_1
 
       end
 
+      v.ready = 0;
+
     end else if (r.state == END) begin
 
       T = ROTL(R[0],5) + F(R[1],R[2],R[3],v.iter) + R[4] + K(v.iter) + W[v.iter];
@@ -174,16 +182,19 @@ module sha_1
 
         v.iter = 0;
         v.state = IDLE;
+        v.ready = 1;
 
       end else begin
 
         v.iter = v.iter + 1;
+        v.ready = 0;
 
       end
 
     end
 
     Hash = {H[0],H[1],H[2],H[3],H[4]};
+    Ready = v.ready;
 
     rin = v;
 

@@ -36,11 +36,13 @@ module sha_512
   typedef struct packed{
     logic [6 : 0] iter;
     logic [1 : 0] state;
+    logic [0 : 0] ready;
   } reg_type;
 
   reg_type init_reg = '{
     iter : 0,
-    state : IDLE
+    state : IDLE,
+    ready : 0
   };
 
   reg_type r,rin;
@@ -159,6 +161,8 @@ module sha_512
 
       end
 
+      v.ready = 0;
+
     end else if (r.state == INIT) begin
 
       if (v.iter < 16) begin
@@ -182,6 +186,8 @@ module sha_512
 
       end
 
+      v.ready = 0;
+
     end else if (r.state == END) begin
 
       T[0] = R[7] + BIGSIGMA(R[4],1) + CH(R[4],R[5],R[6]) + K[v.iter] + W[v.iter];
@@ -203,16 +209,19 @@ module sha_512
 
         v.iter = 0;
         v.state = IDLE;
+        v.ready = 1;
 
       end else begin
 
         v.iter = v.iter + 1;
+        v.ready = 0;
 
       end
 
     end
 
     Hash = {H[0],H[1],H[2],H[3],H[4],H[5],H[6],H[7]};
+    Ready = v.ready;
 
     rin = v;
 
