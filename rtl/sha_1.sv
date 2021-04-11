@@ -16,8 +16,30 @@ module sha_1
   logic [31 : 0] W [0:79];
   logic [31 : 0] R [0:4];
   logic [31 : 0] H [0:4];
+  logic [31 : 0] T;
 
   logic [31 : 0] H_1 [0:4];
+
+  logic [31 : 0] D [0:15];
+
+  integer i;
+
+  localparam IDLE = 2'h0;
+  localparam INIT = 2'h1;
+  localparam END  = 2'h2;
+
+  typedef struct packed{
+    logic [6 : 0] iter;
+    logic [1 : 0] state;
+  } reg_type;
+
+  reg_type init_reg = '{
+    iter : 0,
+    state : IDLE
+  };
+
+  reg_type r,rin;
+  reg_type v;
 
   function [31:0] K;
     input logic [6:0] t;
@@ -95,19 +117,83 @@ module sha_1
 
   always_comb begin
 
-    if (Enable == 1) begin
-      if (Index == 0) begin
-        H = H_1;
+    v = r;
+
+    if (r.state == IDLE) begin
+
+      if (Enable == 1) begin
+        if (Index == 0) begin
+          H = H_1;
+        end
       end
+
+      for (i=0; i<16; i=i+1) begin
+        D[i] = Data[(32*(i+1)-1):(32*(i))];
+      end
+
+      v.iter = 0;
+      v.state = INIT;
+
+    end else if (r.state == INIT) begin
+
+      if (v.iter < 16) begin
+        W[v.iter] = D[v.iter];
+      end else begin
+        W[v.iter] = ROTL((W[v.iter-3] ^ W[v.iter-8] ^ W[v.iter-14] ^ W[v.iter-16]),1);
+      end
+
+      if (v.iter == 79) begin
+
+        for (i=0; i<5; i=i+1) begin
+          R[i] = H[i];
+        end
+
+        v.iter = 0;
+        v.state = END;
+
+      end else begin
+
+        v.iter = v.iter + 1;
+
+      end
+
+    end else if (r.state == END) begin
+
+      T = ROTL(R[0],5) + F(R[1],R[2],R[3],v.iter) + R[4] + K(v.iter) + W[v.iter];
+      R[4] = R[3];
+      R[3] = R[2];
+      R[2] = ROTL(R[1],30);
+      R[1] = R[0];
+      R[0] = T;
+
+      if (v.iter == 79) begin
+
+        for (i=0; i<5; i=i+1) begin
+          H[i] = R[i] + H[i];
+        end
+
+        v.iter = 0;
+        v.state = IDLE;
+
+      end else begin
+
+        v.iter = v.iter + 1;
+
+      end
+
     end
+
+    Hash = {H[0],H[1],H[2],H[3],H[4]};
+
+    rin = v;
 
   end
 
   always_ff @(posedge clk) begin
     if (rst == 0) begin
-
+      r <= init_reg;
     end else begin
-
+      r <= rin;
     end
   end
 

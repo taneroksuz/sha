@@ -18,9 +18,31 @@ module sha_256
   logic [31 : 0] W [0:63];
   logic [31 : 0] R [0:7];
   logic [31 : 0] H [0:7];
+  logic [31 : 0] T [0:1];
 
   logic [31 : 0] H_224 [0:7];
   logic [31 : 0] H_256 [0:7];
+
+  logic [31 : 0] D [0:15];
+
+  integer i;
+
+  localparam IDLE = 2'h0;
+  localparam INIT = 2'h1;
+  localparam END  = 2'h2;
+
+  typedef struct packed{
+    logic [5 : 0] iter;
+    logic [1 : 0] state;
+  } reg_type;
+
+  reg_type init_reg = '{
+    iter : 0,
+    state : IDLE
+  };
+
+  reg_type r,rin;
+  reg_type v;
 
   function [31:0] ROTR;
     input logic [31:0] x;
@@ -98,23 +120,93 @@ module sha_256
 
   always_comb begin
 
-    if (Enable == 1) begin
-      if (Index == 0) begin
-        if (Operation == 0) begin
-          H = H_224;
-        end else if (Operation == 1) begin
-          H = H_256;
+    v = r;
+
+    if (r.state == IDLE) begin
+
+      if (Enable == 1) begin
+
+        if (Index == 0) begin
+          if (Operation == 0) begin
+            H = H_224;
+          end else if (Operation == 1) begin
+            H = H_256;
+          end
         end
+
+        for (i=0; i<16; i=i+1) begin
+          D[i] = Data[(32*(i+1)-1):(32*(i))];
+        end
+
+        v.iter = 0;
+        v.state = INIT;
+
       end
+
+    end else if (r.state == INIT) begin
+
+      if (v.iter < 16) begin
+        W[v.iter] = D[v.iter];
+      end else begin
+        W[v.iter] = SMALLSIGMA(W[v.iter-2],1) + W[v.iter-7] + SMALLSIGMA(W[v.iter-15],0) + W[v.iter-16];
+      end
+
+      if (v.iter == 63) begin
+
+        for (i=0; i<8; i=i+1) begin
+          R[i] = H[i];
+        end
+
+        v.iter = 0;
+        v.state = END;
+
+      end else begin
+
+        v.iter = v.iter + 1;
+
+      end
+
+    end else if (r.state == END) begin
+
+      T[0] = R[7] + BIGSIGMA(R[4],1) + CH(R[4],R[5],R[6]) + K[v.iter] + W[v.iter];
+      T[1] = BIGSIGMA(R[0],0) + MAJ(R[0],R[1],R[2]);
+      R[7] = R[6];
+      R[6] = R[5];
+      R[5] = R[4];
+      R[4] = R[3] + T[0];
+      R[3] = R[2];
+      R[2] = R[1];
+      R[1] = R[0];
+      R[0] = T[0] + T[1];
+
+      if (v.iter == 63) begin
+
+        for (i=0; i<8; i=i+1) begin
+          H[i] = R[i] + H[i];
+        end
+
+        v.iter = 0;
+        v.state = IDLE;
+
+      end else begin
+
+        v.iter = v.iter + 1;
+
+      end
+
     end
+
+    Hash = {H[0],H[1],H[2],H[3],H[4],H[5],H[6],H[7]};
+
+    rin = v;
 
   end
 
   always_ff @(posedge clk) begin
     if (rst == 0) begin
-
+      r <= init_reg;
     end else begin
-
+      r <= rin;
     end
   end
 
