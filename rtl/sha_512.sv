@@ -153,7 +153,7 @@ module sha_512
         end
 
         for (i=0; i<16; i=i+1) begin
-          D[i] = Data[(64*(i+1)-1):(64*(i))];
+          D[i] = Data[i*64 +: 64];
         end
 
         v.iter = 0;

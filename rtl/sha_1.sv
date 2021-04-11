@@ -130,7 +130,7 @@ module sha_1
         end
 
         for (i=0; i<16; i=i+1) begin
-          D[i] = Data[(32*(i+1)-1):(32*(i))];
+          D[i] = Data[i*32 +: 32];
         end
 
         v.iter = 0;
