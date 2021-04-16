@@ -24,8 +24,8 @@ module sha_tb(
 
   string line;
 
-  logic [(Nk-1):0] hash_block [0:(Nw-1)];
-  logic [7:0] data_block [0:(Nw-1)][0:(Nd-1)];
+  logic [(Nk-1):0] hash_block [0:(Nd-1)];
+  logic [7:0] data_block [0:(Nd-1)][0:(Nl-1)];
 
   initial begin
     data_file = $fopen("data.txt", "rb");
@@ -45,13 +45,13 @@ module sha_tb(
       // data_block[i] = line;
       $fgets(line,data_file);
       $write("Data: ");
-      for (j=0; j<1024; j=j+1) begin
+      for (j=0; j<Nl; j=j+1) begin
         data_block[i][j] = line[j];
         $write("%c",data_block[i][j]);
       end
       $display();
 
-      if (i==(Nw-1)) begin
+      if (i==(Nd-1)) begin
         $fclose(data_file);
         $display("Test success!");
         $finish;
@@ -72,7 +72,7 @@ module sha_tb(
       //     $finish;
       //   end
       //   enable <= 1;
-      //   if (i==(Nw-1)) begin
+      //   if (i==(Nd-1)) begin
       //     $display("Test success!");
       //     $finish;
       //   end else begin
