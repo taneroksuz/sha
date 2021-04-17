@@ -3,7 +3,7 @@ default: none
 VERILATOR ?= /opt/verilator/bin/verilator
 SYSTEMC ?= /opt/systemc
 BASEDIR ?= $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
-CYCLES ?= 1000000000
+CYCLES ?= 10000
 KLENGTH ?= 512
 NLENGTH ?= 1024
 NDEPTH ?= 1

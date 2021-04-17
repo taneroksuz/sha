@@ -150,7 +150,7 @@ module sha_256
     end else if (r.state == INIT) begin
 
       if (v.iter < 16) begin
-        W[v.iter] = D[v.iter];
+        W[v.iter] = D[v.iter[3:0]];
       end else begin
         W[v.iter] = SMALLSIGMA(W[v.iter-2],1) + W[v.iter-7] + SMALLSIGMA(W[v.iter-15],0) + W[v.iter-16];
       end

@@ -143,7 +143,7 @@ module sha_1
     end else if (r.state == INIT) begin
 
       if (v.iter < 16) begin
-        W[v.iter] = D[v.iter];
+        W[v.iter] = D[v.iter[3:0]];
       end else begin
         W[v.iter] = ROTL((W[v.iter-3] ^ W[v.iter-8] ^ W[v.iter-14] ^ W[v.iter-16]),1);
       end
