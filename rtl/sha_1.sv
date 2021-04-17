@@ -117,7 +117,7 @@ module sha_1
 
   end
 
-  always_comb begin
+  always_latch begin
 
     v = r;
 

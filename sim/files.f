@@ -3,4 +3,5 @@
 ../../rtl/sha_1.sv
 ../../rtl/sha_256.sv
 ../../rtl/sha_512.sv
+../../rtl/sha.sv
 ../../rtl/sha_tb.sv

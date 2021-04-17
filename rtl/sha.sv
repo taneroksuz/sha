@@ -26,7 +26,6 @@ module sha
   logic [0 : 0] enable_sha;
   logic [0 : 0] ready_block;
   logic [0 : 0] ready_sha;
-  logic [0 : 0] ready;
   logic [0 : 0] function_block;
   logic [1 : 0] operation_sha;
 
@@ -48,7 +47,7 @@ module sha
     enable_block = 0;
     enable_sha = 0;
     function_block = 0;
-    function_block = 0;
+    operation_sha = 0;
 
     if (r.state==IDLE) begin
       if (Enable==1) begin
@@ -100,6 +99,7 @@ module sha
   );
 
   generate
+
     if (Nk==160) begin
       sha_1 sha_1_comp
       (

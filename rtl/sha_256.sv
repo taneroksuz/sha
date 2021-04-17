@@ -6,7 +6,7 @@ module sha_256
   input logic clk,
   input logic [511:0] Data,
   input logic [63:0] Index,
-  input logic [0:0] Operation,
+  input logic [1:0] Operation,
   input logic [0:0] Enable,
   output logic [255:0] Hash,
   output logic [0:0] Ready
