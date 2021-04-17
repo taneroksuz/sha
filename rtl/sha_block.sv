@@ -125,7 +125,7 @@ module sha_block
 
     end
 
-    for (i=0; j<15; i=i+1) begin
+    for (i=0; i<16; i=i+1) begin
       Data[i*Nw +: Nw] = data[i];
     end
 

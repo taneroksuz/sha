@@ -1,5 +1,4 @@
 import sha_const::*;
-import sha_wire::*;
 
 module sha_tb_vivado;
 
