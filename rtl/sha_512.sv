@@ -195,6 +195,8 @@ module sha_512
         W[v.iter] = SMALLSIGMA(W[v.iter-2],1) + W[v.iter-7] + SMALLSIGMA(W[v.iter-15],0) + W[v.iter-16];
       end
 
+      // $display("W[%d]: %x",v.iter,W[v.iter]);
+
       if (v.iter == 79) begin
 
         v.a = H[0];
@@ -205,6 +207,15 @@ module sha_512
         v.f = H[5];
         v.g = H[6];
         v.h = H[7];
+
+        // $display("a: %x",v.a);
+        // $display("b: %x",v.b);
+        // $display("c: %x",v.c);
+        // $display("d: %x",v.d);
+        // $display("e: %x",v.e);
+        // $display("f: %x",v.f);
+        // $display("g: %x",v.g);
+        // $display("h: %x",v.h);
 
         v.iter = 0;
         v.state = END;
@@ -229,6 +240,15 @@ module sha_512
       v.c = v.b;
       v.b = v.a;
       v.a = T[0] + T[1];
+
+      // $display("a: %x",v.a);
+      // $display("b: %x",v.b);
+      // $display("c: %x",v.c);
+      // $display("d: %x",v.d);
+      // $display("e: %x",v.e);
+      // $display("f: %x",v.f);
+      // $display("g: %x",v.g);
+      // $display("h: %x",v.h);
 
       if (v.iter == 79) begin
 

@@ -30,8 +30,8 @@ module sha_block
 
   typedef struct packed{
     logic [31 : 0] index;
-    logic [9 : 0] rest;
-    logic [9 : 0] i;
+    logic [10 : 0] rest;
+    logic [10 : 0] i;
     logic [(Nm-1) : 0] size;
     logic [(Nw-1) : 0] w;
     logic [(Nm-1) : 0] n;
@@ -85,7 +85,7 @@ module sha_block
 
       for (j=0; j<Nt ;j=j+1) begin
         if (v.index == Nl) begin
-          word[j] = 8'h0;
+          word[j] = 8'h80;
           v.state = INTER;
           break;
         end else begin
@@ -96,7 +96,7 @@ module sha_block
       end
 
       for (j=0; j<Nt; j=j+1) begin
-        v.w[j*8 +: 8] = word[j];
+        v.w[j*8 +: 8] = word[Nt-1-j];
       end
 
       data[v.i[3:0]] = v.w;
@@ -113,7 +113,7 @@ module sha_block
 
       v.rest = Nleft - (v.i << Nright);
 
-      if (v.rest[9] == 1) begin
+      if (v.rest[10] == 1) begin
         v.w = v.size[(Nm/2-1):0];
         v.state = END;
       end else if (v.rest > 0) begin

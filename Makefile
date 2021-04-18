@@ -4,9 +4,9 @@ VERILATOR ?= /opt/verilator/bin/verilator
 SYSTEMC ?= /opt/systemc
 BASEDIR ?= $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 CYCLES ?= 1000000000
-KLENGTH ?= 512
+KLENGTH ?= 256
 NLENGTH ?= 32
-NDEPTH ?= 10
+NDEPTH ?= 1
 WAVE ?= "wave"
 
 compile:

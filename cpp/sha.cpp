@@ -323,6 +323,8 @@ template <class T> void SHA::SHA_ALGORITHM(int N, T *H, T *M, T *K)
             {
                 W[t] = sigma(W[t-2],1,Bits) + W[t-7] + sigma(W[t-15],0,Bits) + W[t-16];
             }
+
+            // cout << "W[" << dec << t << "]: " << hex << W[t] << endl;
         }
 
         T a = H[0];
@@ -333,6 +335,15 @@ template <class T> void SHA::SHA_ALGORITHM(int N, T *H, T *M, T *K)
         T f = H[5];
         T g = H[6];
         T h = H[7];
+
+        // cout << "a: " << hex << a << endl;
+        // cout << "b: " << hex << b << endl;
+        // cout << "c: " << hex << c << endl;
+        // cout << "d: " << hex << d << endl;
+        // cout << "e: " << hex << e << endl;
+        // cout << "f: " << hex << f << endl;
+        // cout << "g: " << hex << g << endl;
+        // cout << "h: " << hex << h << endl;
 
         for (int t=0; t<Tmax; t++)
         {
@@ -346,6 +357,15 @@ template <class T> void SHA::SHA_ALGORITHM(int N, T *H, T *M, T *K)
             c = b;
             b = a;
             a = T1 + T2;
+
+            // cout << "a: " << hex << a << endl;
+            // cout << "b: " << hex << b << endl;
+            // cout << "c: " << hex << c << endl;
+            // cout << "d: " << hex << d << endl;
+            // cout << "e: " << hex << e << endl;
+            // cout << "f: " << hex << f << endl;
+            // cout << "g: " << hex << g << endl;
+            // cout << "h: " << hex << h << endl;
         }
 
         H[0] = a + H[0];

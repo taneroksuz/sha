@@ -6,6 +6,10 @@
 #include <cstring>
 #include <cstdio>
 #include <cerrno>
+#include <fstream>
+#include <iostream>
+
+using namespace std;
 
 class SHA
 {
