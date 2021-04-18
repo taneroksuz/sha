@@ -29,6 +29,9 @@ module sha
   logic [0 : 0] function_block;
   logic [1 : 0] operation_sha;
 
+  logic [(Nk-1) : 0] hash;
+  logic [0 : 0] ready;
+
   typedef struct packed{
     logic [1 : 0] state;
   } reg_type;
@@ -49,6 +52,9 @@ module sha
     function_block = 0;
     operation_sha = 0;
 
+    hash = 0;
+    ready = 0;
+
     if (r.state==IDLE) begin
       if (Enable==1) begin
 
@@ -61,26 +67,42 @@ module sha
     end else if (r.state==BLOCK) begin
       if (ready_block==1) begin
         v.state = SHA;
+        enable_sha = 1;
+        if (Nk==224) begin
+          operation_sha = 0;
+        end else if (Nk==256) begin
+          operation_sha = 1;
+        end else if (Nk==384) begin
+          operation_sha = 2;
+        end else if (Nk==512) begin
+          operation_sha = 3;
+        end
       end
 
     end else if (r.state==SHA) begin
+
       if (ready_sha==1) begin
         if (index_block == Ns) begin
           v.state = HASH;
         end else begin
-          v.state = SHA;
+          enable_block = 1;
+          function_block = 1;
+          v.state = BLOCK;
         end
       end
+
     end else if (r.state==HASH) begin
 
       if (ready_sha==1) begin
         v.state = IDLE;
+        hash = hash_sha;
+        ready = ready_sha;
       end
 
     end
 
-    Ready = ready_sha;
-    Hash = hash_sha;
+    Ready = ready;
+    Hash = hash;
 
     rin = v;
 

@@ -3,11 +3,11 @@ default: none
 VERILATOR ?= /opt/verilator/bin/verilator
 SYSTEMC ?= /opt/systemc
 BASEDIR ?= $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
-CYCLES ?= 10000
-KLENGTH ?= 512
+CYCLES ?= 1000000000
+KLENGTH ?= 160
 NLENGTH ?= 1024
 NDEPTH ?= 1
-WAVE ?= "" # "wave" for saving dump file
+WAVE ?= "wave"
 
 compile:
 	g++ -O3 ${BASEDIR}/cpp/sha.cpp ${BASEDIR}/cpp/main.cpp -o ${BASEDIR}/cpp/main.o
@@ -25,4 +25,4 @@ generate:
 	cd ${BASEDIR}/py; \
 	./generate.py -k ${KLENGTH} -d ${NLENGTH} -w ${NDEPTH};
 
-all: generate compile run
+all: generate compile run simulate

@@ -14,7 +14,6 @@ module sha_1
   timeprecision 1ps;
 
   logic [31 : 0] W [0:79];
-  logic [31 : 0] R [0:4];
   logic [31 : 0] H [0:4];
   logic [31 : 0] T;
 
@@ -32,12 +31,22 @@ module sha_1
     logic [6 : 0] iter;
     logic [1 : 0] state;
     logic [0 : 0] ready;
+    logic [31 : 0] a;
+    logic [31 : 0] b;
+    logic [31 : 0] c;
+    logic [31 : 0] d;
+    logic [31 : 0] e;
   } reg_type;
 
   reg_type init_reg = '{
     iter : 0,
     state : IDLE,
-    ready : 0
+    ready : 0,
+    a : 0,
+    b : 0,
+    c : 0,
+    d : 0,
+    e : 0
   };
 
   reg_type r,rin;
@@ -150,9 +159,11 @@ module sha_1
 
       if (v.iter == 79) begin
 
-        for (i=0; i<5; i=i+1) begin
-          R[i] = H[i];
-        end
+        v.a = H[0];
+        v.b = H[1];
+        v.c = H[2];
+        v.d = H[3];
+        v.e = H[4];
 
         v.iter = 0;
         v.state = END;
@@ -167,18 +178,20 @@ module sha_1
 
     end else if (r.state == END) begin
 
-      T = ROTL(R[0],5) + F(R[1],R[2],R[3],v.iter) + R[4] + K(v.iter) + W[v.iter];
-      R[4] = R[3];
-      R[3] = R[2];
-      R[2] = ROTL(R[1],30);
-      R[1] = R[0];
-      R[0] = T;
+      T = ROTL(v.a,5) + F(v.b,v.c,v.d,v.iter) + v.e + K(v.iter) + W[v.iter];
+      v.e = v.d;
+      v.d = v.c;
+      v.c = ROTL(v.b,30);
+      v.b = v.a;
+      v.a = T;
 
       if (v.iter == 79) begin
 
-        for (i=0; i<5; i=i+1) begin
-          H[i] = R[i] + H[i];
-        end
+        v.a = v.a + H[0];
+        v.b = v.b + H[1];
+        v.c = v.c + H[2];
+        v.d = v.d + H[3];
+        v.e = v.e + H[4];
 
         v.iter = 0;
         v.state = IDLE;
@@ -193,7 +206,7 @@ module sha_1
 
     end
 
-    Hash = {H[0],H[1],H[2],H[3],H[4]};
+    Hash = {v.a,v.b,v.c,v.d,v.e};
     Ready = v.ready;
 
     rin = v;

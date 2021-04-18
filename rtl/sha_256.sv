@@ -16,7 +16,6 @@ module sha_256
 
   logic [31 : 0] K [0:63];
   logic [31 : 0] W [0:63];
-  logic [31 : 0] R [0:7];
   logic [31 : 0] H [0:7];
   logic [31 : 0] T [0:1];
 
@@ -35,12 +34,28 @@ module sha_256
     logic [5 : 0] iter;
     logic [1 : 0] state;
     logic [0 : 0] ready;
+    logic [31 : 0] a;
+    logic [31 : 0] b;
+    logic [31 : 0] c;
+    logic [31 : 0] d;
+    logic [31 : 0] e;
+    logic [31 : 0] f;
+    logic [31 : 0] g;
+    logic [31 : 0] h;
   } reg_type;
 
   reg_type init_reg = '{
     iter : 0,
     state : IDLE,
-    ready : 0
+    ready : 0,
+    a : 0,
+    b : 0,
+    c : 0,
+    d : 0,
+    e : 0,
+    f : 0,
+    g : 0,
+    h : 0
   };
 
   reg_type r,rin;
@@ -157,9 +172,14 @@ module sha_256
 
       if (v.iter == 63) begin
 
-        for (i=0; i<8; i=i+1) begin
-          R[i] = H[i];
-        end
+        v.a = H[0];
+        v.b = H[1];
+        v.c = H[2];
+        v.d = H[3];
+        v.e = H[4];
+        v.f = H[5];
+        v.g = H[6];
+        v.h = H[7];
 
         v.iter = 0;
         v.state = END;
@@ -174,22 +194,27 @@ module sha_256
 
     end else if (r.state == END) begin
 
-      T[0] = R[7] + BIGSIGMA(R[4],1) + CH(R[4],R[5],R[6]) + K[v.iter] + W[v.iter];
-      T[1] = BIGSIGMA(R[0],0) + MAJ(R[0],R[1],R[2]);
-      R[7] = R[6];
-      R[6] = R[5];
-      R[5] = R[4];
-      R[4] = R[3] + T[0];
-      R[3] = R[2];
-      R[2] = R[1];
-      R[1] = R[0];
-      R[0] = T[0] + T[1];
+      T[0] = v.h + BIGSIGMA(v.e,1) + CH(v.e,v.f,v.g) + K[v.iter] + W[v.iter];
+      T[1] = BIGSIGMA(v.a,0) + MAJ(v.a,v.b,v.c);
+      v.h = v.g;
+      v.g = v.f;
+      v.f = v.e;
+      v.e = v.d + T[0];
+      v.d = v.c;
+      v.c = v.b;
+      v.b = v.a;
+      v.a = T[0] + T[1];
 
       if (v.iter == 63) begin
 
-        for (i=0; i<8; i=i+1) begin
-          H[i] = R[i] + H[i];
-        end
+        v.a = v.a + H[0];
+        v.b = v.b + H[1];
+        v.c = v.c + H[2];
+        v.d = v.d + H[3];
+        v.e = v.e + H[4];
+        v.f = v.f + H[5];
+        v.g = v.g + H[6];
+        v.h = v.h + H[7];
 
         v.iter = 0;
         v.state = IDLE;
@@ -204,7 +229,7 @@ module sha_256
 
     end
 
-    Hash = {H[0],H[1],H[2],H[3],H[4],H[5],H[6],H[7]};
+    Hash = {v.a,v.b,v.c,v.d,v.e,v.f,v.g,v.h};
     Ready = v.ready;
 
     rin = v;

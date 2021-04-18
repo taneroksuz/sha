@@ -18,9 +18,10 @@ module sha_block
   localparam  Nleft = 112*Nt;
   localparam  Nright = $clog2(8*Nt);
 
-  localparam IDLE = 2'h0;
-  localparam INIT = 2'h1;
-  localparam END  = 2'h2;
+  localparam IDLE  = 2'h0;
+  localparam INIT  = 2'h1;
+  localparam INTER = 2'h2;
+  localparam END   = 2'h3;
 
   logic [7:0] data_block [0:(Nl-1)];
   logic [7:0] word [0:(Nt-1)];
@@ -85,7 +86,8 @@ module sha_block
       for (j=0; j<Nt ;j=j+1) begin
         if (v.index == Nl) begin
           word[j] = 8'h0;
-          v.state = END;
+          v.state = INTER;
+          break;
         end else begin
           word[j] = data_block[v.index];
           v.size = v.size + 8;
@@ -99,11 +101,15 @@ module sha_block
 
       data[v.i[3:0]] = v.w;
 
-      v.i = v.i + 1;
+      if (v.i == 15) begin
+        v.state = END;
+      end else begin
+        v.i = v.i + 1;
+      end
 
       v.ready = 0;
 
-    end else if  (r.state == END) begin
+    end else if (r.state == INTER) begin
 
       v.rest = Nleft - (v.i << Nright);
 
@@ -112,16 +118,22 @@ module sha_block
         v.ready = 0;
       end else if (v.rest == 0) begin
         v.w = v.size[(Nm-1):(Nm/2)];
-        v.ready = 0;
       end else begin
         v.w = v.size[(Nm/2-1):0];
-        v.state = INIT;
-        v.ready = 1;
+        v.state = END;
       end
 
       data[v.i[3:0]] = v.w;
 
       v.i = v.i + 1;
+
+      v.ready = 0;
+
+    end else if (r.state == END) begin
+
+      v.state = IDLE;
+
+      v.ready = 1;
 
     end
 
