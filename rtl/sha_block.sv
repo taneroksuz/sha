@@ -103,9 +103,9 @@ module sha_block
 
       if (v.i == 15) begin
         v.state = END;
-      end else begin
-        v.i = v.i + 1;
       end
+
+      v.i = v.i + 1;
 
       v.ready = 0;
 
@@ -113,14 +113,14 @@ module sha_block
 
       v.rest = Nleft - (v.i << Nright);
 
-      if (v.rest > 0) begin
+      if (v.rest[9] == 1) begin
+        v.w = v.size[(Nm/2-1):0];
+        v.state = END;
+      end else if (v.rest > 0) begin
         v.w = 0;
         v.ready = 0;
       end else if (v.rest == 0) begin
         v.w = v.size[(Nm-1):(Nm/2)];
-      end else begin
-        v.w = v.size[(Nm/2-1):0];
-        v.state = END;
       end
 
       data[v.i[3:0]] = v.w;

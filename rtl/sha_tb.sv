@@ -16,7 +16,6 @@ module sha_tb(
 
   string line;
 
-  logic [7:0] data_block [0:(Nd-1)][0:(Nl-1)];
   logic [(Nk-1):0] hash_block [0:(Nd-1)];
 
   logic [1:0] state;
@@ -48,16 +47,15 @@ module sha_tb(
       i <= 0;
     end else begin
       if (state==0) begin
+        state <= 1;
+      end else if (state==1) begin
         $fgets(line,data_file);
         $write("Data: ");
         for (j=0; j<Nl; j=j+1) begin
-          data_block[i][j] = line[j];
-          $write("%c",data_block[i][j]);
+          data[j] = line[j];
+          $write("%c",data[j]);
         end
         $display();
-        state <= 1;
-      end else if (state==1) begin
-        data = data_block[i];
         $write("HEX: ");
         for (j=0; j<Nl; j=j+1) begin
           $write("%x",data[j]);

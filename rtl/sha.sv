@@ -17,7 +17,6 @@ module sha
   localparam IDLE = 2'h0;
   localparam BLOCK = 2'h1;
   localparam SHA = 2'h2;
-  localparam HASH = 2'h3;
 
   logic [(Nm-1) : 0] index_block;
   logic [(Nb-1) : 0] data_block;
@@ -83,20 +82,14 @@ module sha
 
       if (ready_sha==1) begin
         if (index_block == Ns) begin
-          v.state = HASH;
+          hash = hash_sha;
+          ready = ready_sha;
+          v.state = IDLE;
         end else begin
           enable_block = 1;
           function_block = 1;
           v.state = BLOCK;
         end
-      end
-
-    end else if (r.state==HASH) begin
-
-      if (ready_sha==1) begin
-        v.state = IDLE;
-        hash = hash_sha;
-        ready = ready_sha;
       end
 
     end
