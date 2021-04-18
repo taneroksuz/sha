@@ -149,6 +149,15 @@ module sha_256
           end else if (Operation == 1) begin
             H = H_256;
           end
+        end else begin
+          H[0] = v.a;
+          H[1] = v.b;
+          H[2] = v.c;
+          H[3] = v.d;
+          H[4] = v.e;
+          H[5] = v.f;
+          H[6] = v.g;
+          H[7] = v.h;
         end
 
         for (i=0; i<16; i=i+1) begin

@@ -136,6 +136,12 @@ module sha_1
 
         if (Index == 0) begin
           H = H_1;
+        end else begin
+          H[0] = v.a;
+          H[1] = v.b;
+          H[2] = v.c;
+          H[3] = v.d;
+          H[4] = v.e;
         end
 
         for (i=0; i<16; i=i+1) begin
