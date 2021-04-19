@@ -134,7 +134,7 @@ module sha_1
 
       if (Enable == 1) begin
 
-        if (Index == 0) begin
+        if (Index == 1) begin
           H = H_1;
         end else begin
           H[0] = v.a;

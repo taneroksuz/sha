@@ -143,7 +143,7 @@ module sha_256
 
       if (Enable == 1) begin
 
-        if (Index == 0) begin
+        if (Index == 1) begin
           if (Operation == 0) begin
             H = H_224;
           end else if (Operation == 1) begin
