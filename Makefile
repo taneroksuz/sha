@@ -5,7 +5,7 @@ SYSTEMC ?= /opt/systemc
 BASEDIR ?= $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
 CYCLES ?= 1000000000
 KLENGTH ?= 256
-NLENGTH ?= 32
+NLENGTH ?= 64
 NDEPTH ?= 1
 WAVE ?= "wave"
 

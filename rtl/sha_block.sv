@@ -67,8 +67,6 @@ module sha_block
           v.index = 0;
           v.size = 0;
           v.n = 0;
-        end else begin
-          v.n = v.n + 1;
         end
         v.state = INIT;
       end
@@ -96,7 +94,7 @@ module sha_block
       end
 
       for (j=0; j<Nt; j=j+1) begin
-        v.w[j*8 +: 8] = word[Nt-1-j];
+        v.w[j*8 +: 8] = word[(Nt-1)-j];
       end
 
       data[v.i[3:0]] = v.w;
@@ -130,6 +128,8 @@ module sha_block
       v.ready = 0;
 
     end else if (r.state == END) begin
+
+      v.n = v.n + 1;
 
       v.state = IDLE;
 
