@@ -230,19 +230,18 @@ template <class T> int SHA::massage_block(uint8_t *in, int length, T **massage)
     T w;
     int rest;
     int index = 0;
-    int n = 0;
-    int i,j = 0;
+    int div = (sizeof(T) == 8) ? 128 : 64;
+    int n = length/div + (((div-(length%div)) <= 2*sizeof(T)) ? 2 : 1);
+    int i,j,k = 0;
     T size = 0;
-    bool stop = false;
-    *massage = (T *) malloc(16*sizeof(T));
-    while(1)
+    *massage = (T *) malloc(n*sizeof(T));
+    for (i=0; i<n; i++)
     {
-        i = 0;
-        while(i<16)
+        for (j=0; j<16;j++)
         {
-            if (stop)
+            if (index>length && i==(n-1))
             {
-                rest = (112*sizeof(T)) - ((8*sizeof(T)*i) % (128*sizeof(T)));
+                rest = (112*sizeof(T)) - ((8*sizeof(T)*j) % (128*sizeof(T)));
                 if (rest > 0)
                 {
                     w = 0;
@@ -258,52 +257,34 @@ template <class T> int SHA::massage_block(uint8_t *in, int length, T **massage)
             }
             else
             {
-                j = 0;
-                while(j<sizeof(T))
+                for(k=0; k<sizeof(T); k++)
                 {
-                    word[j] = 0;
-                    j = j + 1;
+                    word[k] = 0;
                 }
-                j = 0;
-                while(j<sizeof(T))
+                for(k=0; k<sizeof(T); k++)
                 {
                     if (index == length)
                     {
-                        word[j] = 0x80;
-                        stop = true;
-                        break;
+                        word[k] = 0x80;
                     }
-                    else
+                    else if (index < length)
                     {
-                        word[j] = in[index];
+                        word[k] = in[index];
                         size = size + 8;
                     }
-                    j = j + 1;
                     index = index + 1;
                 }
                 w = word[0];
-                j = 1;
-                while(j<sizeof(T))
+                for(k=1; k<sizeof(T); k++)
                 {
                     w <<= 8;
-                    w |= word[j];
-                    j = j + 1;
+                    w |= word[k];
                 }
             }
-            (*massage)[16*n+i] = w;
-            i = i + 1;
-        }
-        if (stop)
-        {
-            break;
-        }
-        else
-        {
-            n = n + 1;
-            *massage = (T *) realloc(*massage,16*sizeof(T)*(n+1));
+            (*massage)[16*i+j] = w;
         }
     }
-    return n+1;
+    return n;
 }
 
 template <class T> void SHA::SHA_ALGORITHM(int N, T *H, T *M, T *K)
