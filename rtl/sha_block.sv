@@ -14,9 +14,11 @@ module sha_block
   timeunit 1ns;
   timeprecision 1ps;
 
-  localparam  Nt = Nw/8;
-  localparam  Nleft = 112*Nt;
-  localparam  Nright = $clog2(8*Nt);
+  localparam Nt = Nw/8;
+  localparam Ndiv = Nb/8;
+  localparam Ns = (Nl/Ndiv)+((Ndiv-(Nl%Ndiv) <= 2*Nt) ? 2 : 1);
+  localparam Nleft = 112*Nt;
+  localparam Nright = $clog2(8*Nt);
 
   localparam IDLE  = 2'h0;
   localparam INIT  = 2'h1;
@@ -84,11 +86,11 @@ module sha_block
       for (j=0; j<Nt ;j=j+1) begin
         if (v.index == Nl) begin
           word[j] = 8'h80;
-          v.state = INTER;
-          break;
-        end else begin
+        end else if (v.index < Nl) begin
           word[j] = data_block[v.index];
           v.size = v.size + 8;
+        end else if (v.n == (Ns-1)) begin
+          v.state = INTER;
         end
         v.index = v.index + 1;
       end
@@ -116,7 +118,6 @@ module sha_block
         v.state = END;
       end else if (v.rest > 0) begin
         v.w = 0;
-        v.ready = 0;
       end else if (v.rest == 0) begin
         v.w = v.size[(Nm-1):(Nm/2)];
       end

@@ -241,7 +241,7 @@ template <class T> int SHA::massage_block(uint8_t *in, int length, T **massage)
         {
             if (index>length && i==(n-1))
             {
-                rest = (112*sizeof(T)) - ((8*sizeof(T)*j) % (128*sizeof(T)));
+                rest = (112*sizeof(T)) - (8*sizeof(T)*j);
                 if (rest > 0)
                 {
                     w = 0;

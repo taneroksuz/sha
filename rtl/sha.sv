@@ -12,7 +12,9 @@ module sha
   timeunit 1ns;
   timeprecision 1ps;
 
-  localparam Ns = (8*Nl)/Nb+1;
+  localparam Nt = Nw/8;
+  localparam Ndiv = Nb/8;
+  localparam Ns = (Nl/Ndiv)+((Ndiv-(Nl%Ndiv) <= 2*Nt) ? 2 : 1);
 
   localparam IDLE = 2'h0;
   localparam BLOCK = 2'h1;
