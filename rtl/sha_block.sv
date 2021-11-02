@@ -57,7 +57,7 @@ module sha_block
   reg_type r,rin;
   reg_type v;
 
-  always_comb begin
+  always_latch begin
 
     v = r;
 

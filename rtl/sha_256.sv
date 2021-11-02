@@ -135,7 +135,7 @@ module sha_256
 
   end
 
-  always_comb begin
+  always_latch begin
 
     v = r;
 

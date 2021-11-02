@@ -147,7 +147,7 @@ module sha_512
 
   end
 
-  always_comb begin
+  always_latch begin
 
     v = r;
 
