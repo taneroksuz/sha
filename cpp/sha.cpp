@@ -234,7 +234,7 @@ template <class T> int SHA::massage_block(uint8_t *in, int length, T **massage)
     int n = length/div + (((div-(length%div)) <= 2*sizeof(T)) ? 2 : 1);
     int i,j,k = 0;
     T size = 0;
-    *massage = (T *) malloc(n*sizeof(T));
+    *massage = (T *) malloc(n*div);
     for (i=0; i<n; i++)
     {
         for (j=0; j<16;j++)
