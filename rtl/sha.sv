@@ -107,10 +107,10 @@ module sha
   (
     .rst (rst),
     .clk (clk),
-    .Data_Block (Data),
+    .Data (Data),
     .Enable (enable_block),
     .Function (function_block),
-    .Data (data_block),
+    .Block (data_block),
     .Index (index_block),
     .Ready (ready_block)
   );

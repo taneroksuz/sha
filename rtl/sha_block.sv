@@ -4,10 +4,10 @@ module sha_block
 (
   input logic rst,
   input logic clk,
-  input logic [7:0] Data_Block [0:(Nl-1)],
+  input logic [7:0] Data [0:(Nl-1)],
   input logic [0:0] Enable,
   input logic [0:0] Function,
-  output logic [(Nb-1):0] Data,
+  output logic [(Nb-1):0] Block,
   output logic [(Nm-1):0] Index,
   output logic [0:0] Ready
 );
@@ -25,10 +25,14 @@ module sha_block
   localparam INTER = 2'h2;
   localparam END   = 2'h3;
 
-  logic [7:0] data_block [0:(Nl-1)];
-  logic [7:0] word [0:(Nt-1)];
+  logic [7:0] data_d [0:(Nl-1)];
+  logic [7:0] word_d [0:(Nt-1)];
 
-  logic [(Nw-1) : 0] data [0:15];
+  logic [7:0] data_q [0:(Nl-1)];
+  logic [7:0] word_q [0:(Nt-1)];
+
+  logic [(Nw-1) : 0] block_d [0:15];
+  logic [(Nw-1) : 0] block_q [0:15];
 
   typedef struct packed{
     logic [31 : 0] index;
@@ -57,15 +61,19 @@ module sha_block
   reg_type r,rin;
   reg_type v;
 
-  always_latch begin
+  always_comb begin
 
     v = r;
+
+    data_d = data_q;
+    word_d = word_q;
+    block_d = block_q;
 
     if (r.state == IDLE) begin
 
       if (Enable == 1) begin
         if (Function == 0) begin
-          data_block = Data_Block;
+          data_d = Data;
           v.index = 0;
           v.size = 0;
           v.n = 0;
@@ -80,14 +88,14 @@ module sha_block
     end else if  (r.state == INIT) begin
 
       for (j=0; j<Nt ;j=j+1) begin
-        word[j] = 0;
+        word_d[j] = 0;
       end
 
       for (j=0; j<Nt ;j=j+1) begin
         if (v.index == Nl) begin
-          word[j] = 8'h80;
+          word_d[j] = 8'h80;
         end else if (v.index < Nl) begin
-          word[j] = data_block[v.index];
+          word_d[j] = data_d[v.index];
           v.size = v.size + 8;
         end else if (v.n == (Ns-1)) begin
           v.state = INTER;
@@ -96,10 +104,10 @@ module sha_block
       end
 
       for (j=0; j<Nt; j=j+1) begin
-        v.w[j*8 +: 8] = word[(Nt-1)-j];
+        v.w[j*8 +: 8] = word_d[(Nt-1)-j];
       end
 
-      data[v.i[3:0]] = v.w;
+      block_d[v.i[3:0]] = v.w;
 
       if (v.i == 15) begin
         v.state = END;
@@ -122,7 +130,7 @@ module sha_block
         v.w = v.size[(Nm-1):(Nm/2)];
       end
 
-      data[v.i[3:0]] = v.w;
+      block_d[v.i[3:0]] = v.w;
 
       v.i = v.i + 1;
 
@@ -139,7 +147,7 @@ module sha_block
     end
 
     for (i=0; i<16; i=i+1) begin
-      Data[i*Nw +: Nw] = data[i];
+      Block[i*Nw +: Nw] = block_d[i];
     end
 
     Index = v.n;
@@ -155,6 +163,12 @@ module sha_block
     end else begin
       r <= rin;
     end
+  end
+
+  always_ff @(posedge clk) begin
+    data_q <= data_d;
+    word_q <= word_d;
+    block_q <= block_d;
   end
 
 endmodule

@@ -13,13 +13,18 @@ module sha_1
   timeunit 1ns;
   timeprecision 1ps;
 
-  logic [31 : 0] W [0:79];
-  logic [31 : 0] H [0:4];
-  logic [31 : 0] T;
+  logic [31 : 0] W_d [0:79];
+  logic [31 : 0] D_d [0:15];
+  logic [31 : 0] H_d [0:4];
+
+  logic [31 : 0] W_q [0:79];
+  logic [31 : 0] D_q [0:15];
+  logic [31 : 0] H_q [0:4];
+
+  logic [31 : 0] T_d;
+  logic [31 : 0] T_q;
 
   logic [31 : 0] H_1 [0:4];
-
-  logic [31 : 0] D [0:15];
 
   integer i;
 
@@ -126,26 +131,31 @@ module sha_1
 
   end
 
-  always_latch begin
+  always_comb begin
 
     v = r;
+
+    W_d = W_q;
+    D_d = D_q;
+    H_d = H_q;
+    T_d = T_q;
 
     if (r.state == IDLE) begin
 
       if (Enable == 1) begin
 
         if (Index == 1) begin
-          H = H_1;
+          H_d = H_1;
         end else begin
-          H[0] = v.a;
-          H[1] = v.b;
-          H[2] = v.c;
-          H[3] = v.d;
-          H[4] = v.e;
+          H_d[0] = v.a;
+          H_d[1] = v.b;
+          H_d[2] = v.c;
+          H_d[3] = v.d;
+          H_d[4] = v.e;
         end
 
         for (i=0; i<16; i=i+1) begin
-          D[i] = Data[i*32 +: 32];
+          D_d[i] = Data[i*32 +: 32];
         end
 
         v.iter = 0;
@@ -158,18 +168,18 @@ module sha_1
     end else if (r.state == INIT) begin
 
       if (v.iter < 16) begin
-        W[v.iter] = D[v.iter[3:0]];
+        W_d[v.iter] = D_d[v.iter[3:0]];
       end else begin
-        W[v.iter] = ROTL((W[v.iter-3] ^ W[v.iter-8] ^ W[v.iter-14] ^ W[v.iter-16]),1);
+        W_d[v.iter] = ROTL((W_d[v.iter-3] ^ W_d[v.iter-8] ^ W_d[v.iter-14] ^ W_d[v.iter-16]),1);
       end
 
       if (v.iter == 79) begin
 
-        v.a = H[0];
-        v.b = H[1];
-        v.c = H[2];
-        v.d = H[3];
-        v.e = H[4];
+        v.a = H_d[0];
+        v.b = H_d[1];
+        v.c = H_d[2];
+        v.d = H_d[3];
+        v.e = H_d[4];
 
         v.iter = 0;
         v.state = END;
@@ -184,20 +194,20 @@ module sha_1
 
     end else if (r.state == END) begin
 
-      T = ROTL(v.a,5) + F(v.b,v.c,v.d,v.iter) + v.e + K(v.iter) + W[v.iter];
+      T_d = ROTL(v.a,5) + F(v.b,v.c,v.d,v.iter) + v.e + K(v.iter) + W_d[v.iter];
       v.e = v.d;
       v.d = v.c;
       v.c = ROTL(v.b,30);
       v.b = v.a;
-      v.a = T;
+      v.a = T_d;
 
       if (v.iter == 79) begin
 
-        v.a = v.a + H[0];
-        v.b = v.b + H[1];
-        v.c = v.c + H[2];
-        v.d = v.d + H[3];
-        v.e = v.e + H[4];
+        v.a = v.a + H_d[0];
+        v.b = v.b + H_d[1];
+        v.c = v.c + H_d[2];
+        v.d = v.d + H_d[3];
+        v.e = v.e + H_d[4];
 
         v.iter = 0;
         v.state = IDLE;
@@ -225,6 +235,13 @@ module sha_1
     end else begin
       r <= rin;
     end
+  end
+
+  always_ff @(posedge clk) begin
+    W_q <= W_d;
+    D_q <= D_d;
+    H_q <= H_d;
+    T_q <= T_d;
   end
 
 endmodule

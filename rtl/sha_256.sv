@@ -14,15 +14,21 @@ module sha_256
   timeunit 1ns;
   timeprecision 1ps;
 
+  logic [31 : 0] W_d [0:63];
+  logic [31 : 0] D_d [0:15];
+  logic [31 : 0] H_d [0:7];
+  logic [31 : 0] T_d [0:1];
+
+  logic [31 : 0] W_q [0:63];
+  logic [31 : 0] D_q [0:15];
+  logic [31 : 0] H_q [0:7];
+  logic [31 : 0] T_q [0:1];
+
   logic [31 : 0] K [0:63];
-  logic [31 : 0] W [0:63];
-  logic [31 : 0] H [0:7];
-  logic [31 : 0] T [0:1];
 
   logic [31 : 0] H_224 [0:7];
   logic [31 : 0] H_256 [0:7];
 
-  logic [31 : 0] D [0:15];
 
   integer i;
 
@@ -135,9 +141,14 @@ module sha_256
 
   end
 
-  always_latch begin
+  always_comb begin
 
     v = r;
+
+    W_d = W_q;
+    D_d = D_q;
+    H_d = H_q;
+    T_d = T_q;
 
     if (r.state == IDLE) begin
 
@@ -145,23 +156,23 @@ module sha_256
 
         if (Index == 1) begin
           if (Operation == 0) begin
-            H = H_224;
+            H_d = H_224;
           end else if (Operation == 1) begin
-            H = H_256;
+            H_d = H_256;
           end
         end else begin
-          H[0] = v.a;
-          H[1] = v.b;
-          H[2] = v.c;
-          H[3] = v.d;
-          H[4] = v.e;
-          H[5] = v.f;
-          H[6] = v.g;
-          H[7] = v.h;
+          H_d[0] = v.a;
+          H_d[1] = v.b;
+          H_d[2] = v.c;
+          H_d[3] = v.d;
+          H_d[4] = v.e;
+          H_d[5] = v.f;
+          H_d[6] = v.g;
+          H_d[7] = v.h;
         end
 
         for (i=0; i<16; i=i+1) begin
-          D[i] = Data[i*32 +: 32];
+          D_d[i] = Data[i*32 +: 32];
         end
 
         v.iter = 0;
@@ -174,21 +185,21 @@ module sha_256
     end else if (r.state == INIT) begin
 
       if (v.iter < 16) begin
-        W[v.iter] = D[v.iter[3:0]];
+        W_d[v.iter] = D_d[v.iter[3:0]];
       end else begin
-        W[v.iter] = SMALLSIGMA(W[v.iter-2],1) + W[v.iter-7] + SMALLSIGMA(W[v.iter-15],0) + W[v.iter-16];
+        W_d[v.iter] = SMALLSIGMA(W_d[v.iter-2],1) + W_d[v.iter-7] + SMALLSIGMA(W_d[v.iter-15],0) + W_d[v.iter-16];
       end
 
       if (v.iter == 63) begin
 
-        v.a = H[0];
-        v.b = H[1];
-        v.c = H[2];
-        v.d = H[3];
-        v.e = H[4];
-        v.f = H[5];
-        v.g = H[6];
-        v.h = H[7];
+        v.a = H_d[0];
+        v.b = H_d[1];
+        v.c = H_d[2];
+        v.d = H_d[3];
+        v.e = H_d[4];
+        v.f = H_d[5];
+        v.g = H_d[6];
+        v.h = H_d[7];
 
         v.iter = 0;
         v.state = END;
@@ -203,27 +214,27 @@ module sha_256
 
     end else if (r.state == END) begin
 
-      T[0] = v.h + BIGSIGMA(v.e,1) + CH(v.e,v.f,v.g) + K[v.iter] + W[v.iter];
-      T[1] = BIGSIGMA(v.a,0) + MAJ(v.a,v.b,v.c);
+      T_d[0] = v.h + BIGSIGMA(v.e,1) + CH(v.e,v.f,v.g) + K[v.iter] + W_d[v.iter];
+      T_d[1] = BIGSIGMA(v.a,0) + MAJ(v.a,v.b,v.c);
       v.h = v.g;
       v.g = v.f;
       v.f = v.e;
-      v.e = v.d + T[0];
+      v.e = v.d + T_d[0];
       v.d = v.c;
       v.c = v.b;
       v.b = v.a;
-      v.a = T[0] + T[1];
+      v.a = T_d[0] + T_d[1];
 
       if (v.iter == 63) begin
 
-        v.a = v.a + H[0];
-        v.b = v.b + H[1];
-        v.c = v.c + H[2];
-        v.d = v.d + H[3];
-        v.e = v.e + H[4];
-        v.f = v.f + H[5];
-        v.g = v.g + H[6];
-        v.h = v.h + H[7];
+        v.a = v.a + H_d[0];
+        v.b = v.b + H_d[1];
+        v.c = v.c + H_d[2];
+        v.d = v.d + H_d[3];
+        v.e = v.e + H_d[4];
+        v.f = v.f + H_d[5];
+        v.g = v.g + H_d[6];
+        v.h = v.h + H_d[7];
 
         v.iter = 0;
         v.state = IDLE;
@@ -251,6 +262,13 @@ module sha_256
     end else begin
       r <= rin;
     end
+  end
+
+  always_ff @(posedge clk) begin
+    W_q <= W_d;
+    D_q <= D_d;
+    H_q <= H_d;
+    T_q <= T_d;
   end
 
 endmodule
