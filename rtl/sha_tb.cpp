@@ -20,13 +20,13 @@ int sc_main(int argc, char* argv[])
   char *p;
   const char *dumpfile;
 
+  if (argc>0)
+  {
+    time = strtol(argv[0], &p, 10);
+  }
   if (argc>1)
   {
-    time = strtol(argv[1], &p, 10);
-  }
-  if (argc>2)
-  {
-    filename = string(argv[2]);
+    filename = string(argv[1]);
     filename = filename + ".vcd";
     dumpfile = filename.c_str();
   }
@@ -45,26 +45,23 @@ int sc_main(int argc, char* argv[])
 
 #if VM_TRACE
   VerilatedVcdSc* dump = new VerilatedVcdSc;
+  sc_start(sc_core::SC_ZERO_TIME);
   sha_tb->trace(dump, 99);
   dump->open(dumpfile);
 #endif
-
+  
   while (!Verilated::gotFinish())
   {
 #if VM_TRACE
     if (dump) dump->flush();
 #endif
-    if (VL_TIME_Q() > 0 && VL_TIME_Q() < 10)
+    if (VL_TIME_Q() >= 10000)
     {
-      rst = !1;
+      rst = 1;
     }
-    else if (VL_TIME_Q() > 0)
+    else
     {
-      rst = !0;
-    }
-    if (VL_TIME_Q() > time)
-    {
-      break;
+      rst = 0;
     }
     sc_start(1,SC_NS);
   }

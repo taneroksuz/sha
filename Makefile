@@ -1,25 +1,25 @@
 default: none
 
-VERILATOR ?= /opt/verilator/bin/verilator
-SYSTEMC ?= /opt/systemc
-BASEDIR ?= $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
-CYCLES ?= 1000000000
-KLENGTH ?= 512
-NLENGTH ?= 1024
-NDEPTH ?= 1
-WAVE ?= "wave"
+export VERILATOR ?= /opt/verilator/bin/verilator
+export SYSTEMC ?= /opt/systemc
+export BASEDIR ?= $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+export CYCLES ?= 1000000000
+export KLENGTH ?= 512
+export NLENGTH ?= 1024
+export NDEPTH ?= 1
+export WAVE ?= "off" #on off
 
 compile:
-	g++ -O3 ${BASEDIR}/cpp/sha.cpp ${BASEDIR}/cpp/main.cpp -o ${BASEDIR}/cpp/main.o
+	g++ -O3 ${BASEDIR}/cpp/sha.cpp ${BASEDIR}/cpp/main.cpp -o ${BASEDIR}/cpp/main
 
 run:
 	cp -r ${BASEDIR}/py/*.txt ${BASEDIR}/cpp/; \
 	cd ${BASEDIR}/cpp; \
-	./main.o ${KLENGTH} ${NLENGTH} ${NDEPTH}
+	./main ${KLENGTH} ${NLENGTH} ${NDEPTH}
 
 simulate:
-	${BASEDIR}/rtl/initialize.sh ${BASEDIR} ${KLENGTH} ${NLENGTH} ${NDEPTH}
-	sim/run.sh ${BASEDIR} ${VERILATOR} ${SYSTEMC} ${CYCLES} ${WAVE}
+	${BASEDIR}/rtl/initialize.sh; \
+	${BASEDIR}/sim/run.sh
 
 generate:
 	cd ${BASEDIR}/py; \

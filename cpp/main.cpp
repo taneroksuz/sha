@@ -49,23 +49,22 @@ void compare(uint8_t *in,uint8_t *out, int num)
             break;
         }
     }
-    printf("Hash: ");
+    printf("\x1B[1;34mHASH:\x1B[0m ");
     for (int i=0; i<num; i=i+1)
     {
         printf("%02x",in[i]);
     }
     printf("\n");
-    printf("Correct: ");
+    printf("\x1B[1;34mORIG:\x1B[0m ");
     for (int i=0; i<num; i=i+1)
     {
         printf("%02x",out[i]);
     }
     printf("\n");
-    printf("Hash ");
     if (res)
-        printf("success!\n");
+        printf("\x1B[1;32mTEST SUCCEEDED\x1B[0m\n");
     else
-        printf("failed!\n");
+        printf("\x1B[1;31mTEST FAILED\x1B[0m\n");
 }
 
 int main(int argc, char *argv[])
@@ -92,8 +91,13 @@ int main(int argc, char *argv[])
         getline(hash_file,hash_str);
         get_string(data_str,data,D);
         get(hash_str,hash,K);
-        cout << "Data Length: " << D << endl;
-        cout << "Data: ";
+        cout << "\x1B[1;34mDATA LENGTH:\x1B[0m " << D << endl;
+        cout << "\x1B[1;34mHASH LENGTH:\x1B[0m " << K << endl;
+        cout << "\x1B[1;34mDATA:\x1B[0m ";
+        for (int i=0; i<D; i++)
+            printf("%c",data[i]);
+        cout << endl;
+        cout << "\x1B[1;34mHEX:\x1B[0m ";
         for (int i=0; i<D; i++)
             printf("%02x",data[i]);
         cout << endl;
@@ -117,7 +121,6 @@ int main(int argc, char *argv[])
         {
             s->SHA512(data,D,res);
         }
-        cout << "Key Length: " << K << endl;
         compare(res,hash,K);
     }
 

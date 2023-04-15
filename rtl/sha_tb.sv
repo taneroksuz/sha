@@ -27,6 +27,23 @@ module sha_tb(
 
   initial begin
     data_file = $fopen("data.txt", "rb");
+    $fgets(line,data_file);
+    $write("%c[1;34m",8'h1B);
+    $write("DATA: ");
+    $write("%c[0m",8'h1B);
+    for (j=0; j<Nl; j=j+1) begin
+      data[j] = line[j];
+      $write("%c",data[j]);
+    end
+    $display();
+    $write("%c[1;34m",8'h1B);
+    $write("HEX: ");
+    $write("%c[0m",8'h1B);
+    for (j=0; j<Nl; j=j+1) begin
+      $write("%x",data[j]);
+    end
+    $display();
+    $fclose(data_file);
     $readmemh("hash.txt", hash_block);
   end
 
@@ -49,32 +66,29 @@ module sha_tb(
       if (state==0) begin
         state <= 1;
       end else if (state==1) begin
-        $fgets(line,data_file);
-        $write("Data: ");
-        for (j=0; j<Nl; j=j+1) begin
-          data[j] = line[j];
-          $write("%c",data[j]);
-        end
-        $display();
-        $write("HEX: ");
-        for (j=0; j<Nl; j=j+1) begin
-          $write("%x",data[j]);
-        end
-        $display();
         enable <= 1;
         state <= 2;
       end else if (state==2) begin
         enable <= 0;
         if (ready==1) begin
-          $display("Result: %x",hash);
-          $display("Correct: %x",hash_block[i]);
+          $write("%c[1;34m",8'h1B);
+          $write("HASH: ");
+          $write("%c[0m",8'h1B);
+          $display("%x",hash);
+          $write("%c[1;34m",8'h1B);
+          $write("ORIG: ");
+          $write("%c[0m",8'h1B);
+          $display("%x",hash_block[i]);
           if (|(hash ^ hash_block[i]) == 0) begin
-            $display("Test success!");
+            $write("%c[1;32m",8'h1B);
+            $display("TEST SUCCEEDED");
+            $write("%c[0m",8'h1B);
           end else begin
-            $display("Test failed!");
+            $write("%c[1;31m",8'h1B);
+            $display("TEST FAILED");
+            $write("%c[0m",8'h1B);
           end
           if (i==(Nd-1)) begin
-            $fclose(data_file);
             $finish;
           end else begin
             i <= i+1;
