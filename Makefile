@@ -3,7 +3,7 @@ default: none
 export VERILATOR ?= /opt/verilator/bin/verilator
 export SYSTEMC ?= /opt/systemc
 export BASEDIR ?= $(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
-export CYCLES ?= 1000000000
+export MAXTIME ?= 1000000000
 export KLENGTH ?= 512
 export NLENGTH ?= 1024
 export NDEPTH ?= 1

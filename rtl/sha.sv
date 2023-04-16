@@ -109,7 +109,7 @@ module sha
     .clk (clk),
     .Data (Data),
     .Enable (enable_block),
-    .Function (function_block),
+    .Funct (function_block),
     .Block (data_block),
     .Index (index_block),
     .Ready (ready_block)

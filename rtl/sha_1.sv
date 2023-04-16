@@ -30,7 +30,7 @@ module sha_1
 
   localparam IDLE = 2'h0;
   localparam INIT = 2'h1;
-  localparam END  = 2'h2;
+  localparam STOP = 2'h2;
 
   typedef struct packed{
     logic [6 : 0] iter;
@@ -182,7 +182,7 @@ module sha_1
         v.e = H_d[4];
 
         v.iter = 0;
-        v.state = END;
+        v.state = STOP;
 
       end else begin
 
@@ -192,7 +192,7 @@ module sha_1
 
       v.ready = 0;
 
-    end else if (r.state == END) begin
+    end else if (r.state == STOP) begin
 
       T_d = ROTL(v.a,5) + F(v.b,v.c,v.d,v.iter) + v.e + K(v.iter) + W_d[v.iter];
       v.e = v.d;

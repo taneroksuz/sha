@@ -6,7 +6,7 @@ module sha_block
   input logic clk,
   input logic [7:0] Data [0:(Nl-1)],
   input logic [0:0] Enable,
-  input logic [0:0] Function,
+  input logic [0:0] Funct,
   output logic [(Nb-1):0] Block,
   output logic [(Nm-1):0] Index,
   output logic [0:0] Ready
@@ -23,7 +23,7 @@ module sha_block
   localparam IDLE  = 2'h0;
   localparam INIT  = 2'h1;
   localparam INTER = 2'h2;
-  localparam END   = 2'h3;
+  localparam STOP  = 2'h3;
 
   logic [7:0] data_d [0:(Nl-1)];
   logic [7:0] word_d [0:(Nt-1)];
@@ -72,7 +72,7 @@ module sha_block
     if (r.state == IDLE) begin
 
       if (Enable == 1) begin
-        if (Function == 0) begin
+        if (Funct == 0) begin
           data_d = Data;
           v.index = 0;
           v.size = 0;
@@ -110,7 +110,7 @@ module sha_block
       block_d[v.i[3:0]] = v.w;
 
       if (v.i == 15) begin
-        v.state = END;
+        v.state = STOP;
       end
 
       v.i = v.i + 1;
@@ -123,7 +123,7 @@ module sha_block
 
       if (v.rest[10] == 1) begin
         v.w = v.size[(Nm/2-1):0];
-        v.state = END;
+        v.state = STOP;
       end else if (v.rest > 0) begin
         v.w = 0;
       end else if (v.rest == 0) begin
@@ -136,7 +136,7 @@ module sha_block
 
       v.ready = 0;
 
-    end else if (r.state == END) begin
+    end else if (r.state == STOP) begin
 
       v.n = v.n + 1;
 

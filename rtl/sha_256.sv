@@ -34,7 +34,7 @@ module sha_256
 
   localparam IDLE = 2'h0;
   localparam INIT = 2'h1;
-  localparam END  = 2'h2;
+  localparam STOP = 2'h2;
 
   typedef struct packed{
     logic [5 : 0] iter;
@@ -202,7 +202,7 @@ module sha_256
         v.h = H_d[7];
 
         v.iter = 0;
-        v.state = END;
+        v.state = STOP;
 
       end else begin
 
@@ -212,7 +212,7 @@ module sha_256
 
       v.ready = 0;
 
-    end else if (r.state == END) begin
+    end else if (r.state == STOP) begin
 
       T_d[0] = v.h + BIGSIGMA(v.e,1) + CH(v.e,v.f,v.g) + K[v.iter] + W_d[v.iter];
       T_d[1] = BIGSIGMA(v.a,0) + MAJ(v.a,v.b,v.c);
