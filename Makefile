@@ -7,7 +7,7 @@ export MAXTIME ?= 1000000000
 export KLENGTH ?= 512
 export NLENGTH ?= 1024
 export NDEPTH ?= 1
-export WAVE ?= "off" #on off
+export WAVE ?= off# on off
 
 compile:
 	g++ -O3 ${BASEDIR}/cpp/sha.cpp ${BASEDIR}/cpp/main.cpp -o ${BASEDIR}/cpp/main
