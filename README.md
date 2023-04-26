@@ -4,7 +4,7 @@ Hardware and software implementation of SHA algorithm. This algorithm is impleme
 ## Hardware Implementation
 This algorithm is implemented in finite state machine.
 
-| Algorithm | SHA1 | SHA256 | SHA512 |
-|:-----------|:---:|:---:|:---:|
-| LUT | 3558 | 3064 | 7536 |
-| FF | 3458 | 3133 | 7281 |
+| Algorithm  | SHA1 | SHA2-256 | SHA2-512 |
+|:-----------|:----:|:--------:|:--------:|
+| LUT        | 3555 | 3403     | 7692     |
+| FF         | 3458 | 3138     | 7290     |

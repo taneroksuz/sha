@@ -129,7 +129,7 @@ module sha
         .Ready (ready_sha)
       );
     end else if (Nk==256) begin
-      sha_256 sha_256_comp
+      sha_2_256 sha_2_256_comp
       (
         .rst (rst),
         .clk (clk),
@@ -141,7 +141,7 @@ module sha
         .Ready (ready_sha)
       );
     end else if (Nk==512) begin
-      sha_512 sha_512_comp
+      sha_2_512 sha_2_512_comp
       (
         .rst (rst),
         .clk (clk),

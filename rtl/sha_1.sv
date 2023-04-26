@@ -1,5 +1,3 @@
-import sha_const::*;
-
 module sha_1
 (
   input logic rst,
@@ -24,9 +22,9 @@ module sha_1
   logic [31 : 0] T_d;
   logic [31 : 0] T_q;
 
-  logic [31 : 0] H_1 [0:4];
-
-  integer i;
+  localparam logic [31 : 0] H_1 [0:4] = '{
+    32'H67452301,32'HEFCDAB89,32'H98BADCFE,32'H10325476,32'HC3D2E1F0
+  };
 
   localparam IDLE = 2'h0;
   localparam INIT = 2'h1;
@@ -125,12 +123,6 @@ module sha_1
     end
   endfunction
 
-  initial begin
-
-    H_1[0]=32'h67452301; H_1[1]=32'hefcdab89; H_1[2]=32'h98badcfe; H_1[3]=32'h10325476; H_1[4]=32'hc3d2e1f0;
-
-  end
-
   always_comb begin
 
     v = r;
@@ -154,7 +146,7 @@ module sha_1
           H_d[4] = v.e;
         end
 
-        for (i=0; i<16; i=i+1) begin
+        for (int i=0; i<16; i=i+1) begin
           D_d[i] = Data[i*32 +: 32];
         end
 
