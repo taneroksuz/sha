@@ -72,7 +72,13 @@ int main(int argc, char *argv[])
     ifstream data_file("data.txt", fstream::in);
     ifstream hash_file("hash.txt", fstream::in);
 
-    int K = atoi(argv[1])/8;
+    int K;
+    if (argv[1] == "0")
+        K = 24;
+    else if (argv[1] == "1")
+        K = 32;
+    else if (argv[1] == "2")
+        K = 64;
     int D = atoi(argv[2]);
     int W = atoi(argv[3]);
 
