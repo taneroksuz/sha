@@ -1,4 +1,4 @@
-default: none
+default: all
 
 export VERILATOR ?= /opt/verilator/bin/verilator
 export SYSTEMC ?= /opt/systemc
