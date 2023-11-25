@@ -16,33 +16,23 @@ module sha_tb(
 
   string line;
 
+  logic [7:0] data_block [0:(Nd-1)][0:(Nl-1)];
   logic [(Nk-1):0] hash_block [0:(Nd-1)];
 
   logic [1:0] state;
 
-  logic [7:0] data [0:(Nl-1)];
   logic [0:0] enable;
   logic [(Nk-1):0] hash;
   logic [0:0] ready;
 
   initial begin
     data_file = $fopen("data.txt", "rb");
-    $fgets(line,data_file);
-    $write("%c[1;34m",8'h1B);
-    $write("DATA: ");
-    $write("%c[0m",8'h1B);
-    for (j=0; j<Nl; j=j+1) begin
-      data[j] = line[j];
-      $write("%c",data[j]);
+    for (i=0; i<Nd; i=i+1) begin
+      $fgets(line,data_file);
+      for (j=0; j<Nl; j=j+1) begin
+        data_block[i][j] = line[j];
+      end
     end
-    $display();
-    $write("%c[1;34m",8'h1B);
-    $write("HEX: ");
-    $write("%c[0m",8'h1B);
-    for (j=0; j<Nl; j=j+1) begin
-      $write("%x",data[j]);
-    end
-    $display();
     $fclose(data_file);
     $readmemh("hash.txt", hash_block);
   end
@@ -51,7 +41,7 @@ module sha_tb(
   (
     .rst (rst),
     .clk (clk),
-    .Data (data),
+    .Data (data_block[i]),
     .Enable (enable),
     .Hash (hash),
     .Ready (ready)
@@ -64,13 +54,25 @@ module sha_tb(
       i <= 0;
     end else begin
       if (state==0) begin
+        enable <= 1;
         state <= 1;
       end else if (state==1) begin
-        enable <= 1;
-        state <= 2;
-      end else if (state==2) begin
         enable <= 0;
         if (ready==1) begin
+          $write("%c[1;34m",8'h1B);
+          $write("DATA: ");
+          $write("%c[0m",8'h1B);
+          for (j=0; j<Nl; j=j+1) begin
+            $write("%c",data_block[i][j]);
+          end
+          $display();
+          $write("%c[1;34m",8'h1B);
+          $write("HEX: ");
+          $write("%c[0m",8'h1B);
+          for (j=0; j<Nl; j=j+1) begin
+            $write("%x",data_block[i][j]);
+          end
+          $display();
           $write("%c[1;34m",8'h1B);
           $write("HASH: ");
           $write("%c[0m",8'h1B);
@@ -92,7 +94,7 @@ module sha_tb(
             $finish;
           end else begin
             i <= i+1;
-            state <= 1;
+            state <= 0;
           end
         end
       end

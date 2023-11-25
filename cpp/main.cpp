@@ -74,7 +74,7 @@ int main(int argc, char *argv[])
 
     int K;
     if (argv[1] == "0")
-        K = 24;
+        K = 20;
     else if (argv[1] == "1")
         K = 32;
     else if (argv[1] == "2")
