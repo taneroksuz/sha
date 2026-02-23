@@ -69,72 +69,57 @@ void compare(uint8_t *in,uint8_t *out, int num)
 
 int main(int argc, char *argv[])
 {
-    ifstream data_file("data.txt", fstream::in);
-    ifstream hash_file("hash.txt", fstream::in);
+    ifstream data_file("./out/plaintext.hex", fstream::in);
+    ifstream sha1_hash_file("./out/sha1.hex", fstream::in);
+    ifstream sha256_hash_file("./out/sha256.hex", fstream::in);
+    ifstream sha512_hash_file("./out/sha512.hex", fstream::in);
 
-    int K;
-    if (atoi(argv[1]) == 0)
-    {
-        K = 20;
-    }
-    else if (atoi(argv[1]) == 1)
-    {
-        K = 32;
-    }
-    else if (atoi(argv[1]) == 2)
-    {
-        K = 64;
-    }
-    int D = atoi(argv[2]);
-    int W = atoi(argv[3]);
+    int D = atoi(argv[1]);
 
     uint8_t *data = (uint8_t *) malloc(D*sizeof(uint8_t));
-    uint8_t *hash = (uint8_t *) malloc(K*sizeof(uint8_t));
-    uint8_t *res = (uint8_t *) malloc(K*sizeof(uint8_t));
 
     string data_str;
-    string hash_str;
+
+    getline(data_file,data_str);
+    get(data_str,data,D);
 
     SHA *s = new SHA();
 
-    for (int i=0; i<W; i++)
-    {
-        getline(data_file,data_str);
-        getline(hash_file,hash_str);
-        get_string(data_str,data,D);
-        get(hash_str,hash,K);
-        cout << "\x1B[1;34mDATA LENGTH:\x1B[0m " << D << endl;
-        cout << "\x1B[1;34mHASH LENGTH:\x1B[0m " << K << endl;
-        cout << "\x1B[1;34mDATA:\x1B[0m ";
-        for (int i=0; i<D; i++)
-            printf("%c",data[i]);
-        cout << endl;
-        cout << "\x1B[1;34mHEX:\x1B[0m ";
-        for (int i=0; i<D; i++)
-            printf("%02x",data[i]);
-        cout << endl;
-        if (K==20)
-        {
-            s->SHA1(data,D,res);
-        }
-        else if (K==28)
-        {
-            s->SHA224(data,D,res);
-        }
-        else if (K==32)
-        {
-            s->SHA256(data,D,res);
-        }
-        else if (K==48)
-        {
-            s->SHA384(data,D,res);
-        }
-        else if (K==64)
-        {
-            s->SHA512(data,D,res);
-        }
-        compare(res,hash,K);
-    }
+    int K = 20;
+
+    uint8_t *sha1_hash = (uint8_t *) malloc(K*sizeof(uint8_t));
+    uint8_t *sha1_res = (uint8_t *) malloc(K*sizeof(uint8_t));
+
+    string sha1_hash_str;
+
+    getline(sha1_hash_file,sha1_hash_str);
+    get(sha1_hash_str,sha1_hash,K);
+    s->SHA1(data,D,sha1_res);
+    compare(sha1_res,sha1_hash,K);
+
+    K = 32;
+
+    uint8_t *sha256_hash = (uint8_t *) malloc(K*sizeof(uint8_t));
+    uint8_t *sha256_res = (uint8_t *) malloc(K*sizeof(uint8_t));
+
+    string sha256_hash_str;
+
+    getline(sha256_hash_file,sha256_hash_str);
+    get(sha256_hash_str,sha256_hash,K);
+    s->SHA256(data,D,sha256_res);
+    compare(sha256_res,sha256_hash,K);
+
+    K = 64;
+
+    uint8_t *sha512_hash = (uint8_t *) malloc(K*sizeof(uint8_t));
+    uint8_t *sha512_res = (uint8_t *) malloc(K*sizeof(uint8_t));
+
+    string sha512_hash_str;
+
+    getline(sha512_hash_file,sha512_hash_str);
+    get(sha512_hash_str,sha512_hash,K);
+    s->SHA512(data,D,sha512_res);
+    compare(sha512_res,sha512_hash,K);
 
     return 0;
 }
