@@ -4,7 +4,7 @@
 #  Install OpenSSL, generate random plaintext, compute SHA-1 / SHA-256 / SHA-512
 #  Saves each hash and plaintext as separate .hex files
 #
-#  Usage: ./sha_demo.sh [PLAINTEXT_BYTES]
+#  Usage: ./generate.sh [PLAINTEXT_BYTES]
 # =============================================================================
 
 set -euo pipefail

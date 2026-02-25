@@ -1,3 +1,3 @@
-../../rtl/sha_1.sv
-../../rtl/sha_2_256.sv
-../../rtl/sha_2_512.sv
+../../rtl/sha1.sv
+../../rtl/sha256.sv
+../../rtl/sha512.sv
