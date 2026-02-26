@@ -294,8 +294,6 @@ module sha512 (
             W_d[v.iter-16];
       end
 
-      // $display("W_d[%d]: %x",v.iter,W_d[v.iter]);
-
       if (v.iter == 79) begin
 
         v.a = H_d[0];
@@ -306,15 +304,6 @@ module sha512 (
         v.f = H_d[5];
         v.g = H_d[6];
         v.h = H_d[7];
-
-        // $display("a: %x",v.a);
-        // $display("b: %x",v.b);
-        // $display("c: %x",v.c);
-        // $display("d: %x",v.d);
-        // $display("e: %x",v.e);
-        // $display("f: %x",v.f);
-        // $display("g: %x",v.g);
-        // $display("h: %x",v.h);
 
         v.iter = 0;
         v.state = STOP;
@@ -339,15 +328,6 @@ module sha512 (
       v.c = v.b;
       v.b = v.a;
       v.a = T_d[0] + T_d[1];
-
-      // $display("a: %x",v.a);
-      // $display("b: %x",v.b);
-      // $display("c: %x",v.c);
-      // $display("d: %x",v.d);
-      // $display("e: %x",v.e);
-      // $display("f: %x",v.f);
-      // $display("g: %x",v.g);
-      // $display("h: %x",v.h);
 
       if (v.iter == 79) begin
 
