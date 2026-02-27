@@ -15,29 +15,19 @@ class SHA
 {
   private:
 
-    template <class T> T ROTL(T x, int n);
-
     template <class T> T ROTR(T x, int n);
 
     template <class T> T SHR(T x, int n);
 
-    template <class T> T ADD(T x, T y);
+    template <class T> T CH(T x, T y, T z);
 
-    template <class T> T Ch(T x, T y, T z);
+    template <class T> T MAJ(T x, T y, T z);
 
-    template <class T> T Maj(T x, T y, T z);
+    template <class T> T BIGSIGMA(T x, int t, int k);
 
-    template <class T> T Parity(T x, T y, T z);
+    template <class T> T SMALLSIGMA(T x, int t, int k);
 
-    template <class T> T f(T x, T y, T z, int t);
-
-    template <class T> T SIGMA(T x, int t, int k);
-
-    template <class T> T sigma(T x, int t, int k);
-
-    uint32_t K_1(int t);
-
-    template <class T> int massage_block(uint8_t *in, int length, T **massage);
+    template <class T> int MASSAGE_BLOCK(uint8_t *in, int length, T **massage);
 
     template <class T> void SHA_ALGORITHM(int N, T *H, T *M, T *K);
 

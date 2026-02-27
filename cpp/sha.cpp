@@ -50,11 +50,6 @@ uint64_t H_512[8] = {
 0x1f83d9abfb41bd6b,
 0x5be0cd19137e2179};
 
-template <class T> T SHA::ROTL(T x, int n)
-{
-    return ((x << n) | (x >> (8*sizeof(T) - n)));
-}
-
 template <class T> T SHA::ROTR(T x, int n)
 {
     return ((x >> n) | (x << (8*sizeof(T) - n)));
@@ -65,47 +60,17 @@ template <class T> T SHA::SHR(T x, int n)
     return (x >> n);
 }
 
-template <class T> T SHA::ADD(T x, T y)
-{
-    return (x + y);
-}
-
-template <class T> T SHA::Ch(T x, T y, T z)
+template <class T> T SHA::CH(T x, T y, T z)
 {
     return (x & y) ^ ((~x) & z);
 }
 
-template <class T> T SHA::Maj(T x, T y, T z)
+template <class T> T SHA::MAJ(T x, T y, T z)
 {
     return (x & y) ^ (x & z) ^ (y & z);
 }
 
-template <class T> T SHA::Parity(T x, T y, T z)
-{
-    return (x ^ y ^ z);
-}
-
-template <class T> T SHA::f(T x, T y, T z, int t)
-{
-    if (t >=0 && t<=19)
-    {
-        return Ch(x,y,z);
-    }
-    else if (t >=20 && t<=39)
-    {
-        return Parity(x,y,z);
-    }
-    else if (t >=40 && t<=59)
-    {
-        return Maj(x,y,z);
-    }
-    else
-    {
-        return Parity(x,y,z);
-    }
-}
-
-template <class T> T SHA::SIGMA(T x, int t, int k)
+template <class T> T SHA::BIGSIGMA(T x, int t, int k)
 {
     if (k==256)
     {
@@ -131,7 +96,7 @@ template <class T> T SHA::SIGMA(T x, int t, int k)
     }
 }
 
-template <class T> T SHA::sigma(T x, int t, int k)
+template <class T> T SHA::SMALLSIGMA(T x, int t, int k)
 {
     if (k==256)
     {
@@ -157,7 +122,7 @@ template <class T> T SHA::sigma(T x, int t, int k)
     }
 }
 
-template <class T> int SHA::massage_block(uint8_t *in, int length, T **massage)
+template <class T> int SHA::MASSAGE_BLOCK(uint8_t *in, int length, T **massage)
 {
     uint8_t word[sizeof(T)];
     T w;
@@ -235,7 +200,7 @@ template <class T> void SHA::SHA_ALGORITHM(int N, T *H, T *M, T *K)
             }
             else
             {
-                W[t] = sigma(W[t-2],1,Bits) + W[t-7] + sigma(W[t-15],0,Bits) + W[t-16];
+                W[t] = SMALLSIGMA(W[t-2],1,Bits) + W[t-7] + SMALLSIGMA(W[t-15],0,Bits) + W[t-16];
             }
         }
 
@@ -250,8 +215,8 @@ template <class T> void SHA::SHA_ALGORITHM(int N, T *H, T *M, T *K)
 
         for (int t=0; t<Tmax; t++)
         {
-            T T1 = h + SIGMA(e,1,Bits) + Ch(e,f,g)+ K[t] + W[t];
-            T T2 = SIGMA(a,0,Bits) + Maj(a,b,c);
+            T T1 = h + BIGSIGMA(e,1,Bits) + CH(e,f,g)+ K[t] + W[t];
+            T T2 = BIGSIGMA(a,0,Bits) + MAJ(a,b,c);
             h = g;
             g = f;
             f = e;
@@ -280,7 +245,7 @@ void SHA::SHA256(uint8_t *in, int length, uint8_t *out)
     uint32_t W[64];
     uint32_t H[8] = {H_256[0],H_256[1],H_256[2],H_256[3],H_256[4],H_256[5],H_256[6],H_256[7]};
 
-    N = massage_block(in,length,&M);
+    N = MASSAGE_BLOCK(in,length,&M);
 
     SHA_ALGORITHM(N,&H[0],&M[0],&K_256[0]);
 
@@ -301,7 +266,7 @@ void SHA::SHA512(uint8_t *in, int length, uint8_t *out)
     uint64_t *M;
     uint64_t H[8] = {H_512[0],H_512[1],H_512[2],H_512[3],H_512[4],H_512[5],H_512[6],H_512[7]};
 
-    N = massage_block(in,length,&M);
+    N = MASSAGE_BLOCK(in,length,&M);
 
     SHA_ALGORITHM(N,&H[0],&M[0],&K_512[0]);
 
