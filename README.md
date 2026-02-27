@@ -8,3 +8,4 @@ This algorithm is implemented in finite state machine.
 |:-----------|:------:|:------:|
 | LUT        | 3403   | 7692   |
 | FF         | 3138   | 7290   |
+| BRAM       | 0      | 1      |
