@@ -9,15 +9,11 @@ module sha512 (
 );
   timeunit 1ns; timeprecision 1ps;
 
-  logic [63 : 0] W_d[0:79];
-  logic [63 : 0] D_d[0:15];
+  logic [63 : 0] D_d[0:79];
   logic [63 : 0] H_d[ 0:7];
-  logic [63 : 0] T_d[ 0:1];
 
-  logic [63 : 0] W_q[0:79];
-  logic [63 : 0] D_q[0:15];
+  logic [63 : 0] D_q[0:79];
   logic [63 : 0] H_q[ 0:7];
-  logic [63 : 0] T_q[ 0:1];
 
   localparam logic [63 : 0] K[0:79] = '{
       64'H428A2F98D728AE22,
@@ -110,6 +106,9 @@ module sha512 (
     logic [6 : 0]  iter;
     logic [1 : 0]  state;
     logic [0 : 0]  ready;
+    logic [63 : 0] swap;
+    logic [63 : 0] swap1;
+    logic [63 : 0] swap0;
     logic [63 : 0] a;
     logic [63 : 0] b;
     logic [63 : 0] c;
@@ -124,6 +123,9 @@ module sha512 (
       iter : 0,
       state : IDLE,
       ready : 0,
+      swap : 0,
+      swap1 : 0,
+      swap0 : 0,
       a : 0,
       b : 0,
       c : 0,
@@ -199,10 +201,8 @@ module sha512 (
 
     v   = r;
 
-    W_d = W_q;
     D_d = D_q;
     H_d = H_q;
-    T_d = T_q;
 
     if (r.state == IDLE) begin
 
@@ -217,6 +217,14 @@ module sha512 (
           H_d[5] = 64'H9B05688C2B3E6C1F;
           H_d[6] = 64'H1F83D9ABFB41BD6B;
           H_d[7] = 64'H5BE0CD19137E2179;
+          v.a = H_d[0];
+          v.b = H_d[1];
+          v.c = H_d[2];
+          v.d = H_d[3];
+          v.e = H_d[4];
+          v.f = H_d[5];
+          v.g = H_d[6];
+          v.h = H_d[7];
         end else begin
           H_d[0] = v.a;
           H_d[1] = v.b;
@@ -242,22 +250,35 @@ module sha512 (
     end else if (r.state == INIT) begin
 
       if (v.iter < 16) begin
-        W_d[v.iter] = D_d[v.iter[3:0]];
+        v.swap = D_d[v.iter];
       end else begin
-        W_d[v.iter] = SMALLSIGMA(W_d[v.iter-2], 1) + W_d[v.iter-7] + SMALLSIGMA(W_d[v.iter-15], 0) +
-            W_d[v.iter-16];
+        v.swap = SMALLSIGMA(D_d[v.iter-2], 1) + D_d[v.iter-7] + SMALLSIGMA(D_d[v.iter-15], 0) + D_d[v.iter-16];
       end
+
+      v.swap0 = v.h + BIGSIGMA(v.e, 1) + CH(v.e, v.f, v.g) + K[v.iter] + v.swap;
+      v.swap1 = BIGSIGMA(v.a, 0) + MAJ(v.a, v.b, v.c);
+
+      v.h = v.g;
+      v.g = v.f;
+      v.f = v.e;
+      v.e = v.d + v.swap0;
+      v.d = v.c;
+      v.c = v.b;
+      v.b = v.a;
+      v.a = v.swap0 + v.swap1;
+
+      D_d[v.iter] = v.swap;
 
       if (v.iter == 79) begin
 
-        v.a = H_d[0];
-        v.b = H_d[1];
-        v.c = H_d[2];
-        v.d = H_d[3];
-        v.e = H_d[4];
-        v.f = H_d[5];
-        v.g = H_d[6];
-        v.h = H_d[7];
+        v.a = v.a + H_d[0];
+        v.b = v.b + H_d[1];
+        v.c = v.c + H_d[2];
+        v.d = v.d + H_d[3];
+        v.e = v.e + H_d[4];
+        v.f = v.f + H_d[5];
+        v.g = v.g + H_d[6];
+        v.h = v.h + H_d[7];
 
         v.iter = 0;
         v.state = STOP;
@@ -272,38 +293,8 @@ module sha512 (
 
     end else if (r.state == STOP) begin
 
-      T_d[0] = v.h + BIGSIGMA(v.e, 1) + CH(v.e, v.f, v.g) + K[v.iter] + W_d[v.iter];
-      T_d[1] = BIGSIGMA(v.a, 0) + MAJ(v.a, v.b, v.c);
-      v.h = v.g;
-      v.g = v.f;
-      v.f = v.e;
-      v.e = v.d + T_d[0];
-      v.d = v.c;
-      v.c = v.b;
-      v.b = v.a;
-      v.a = T_d[0] + T_d[1];
-
-      if (v.iter == 79) begin
-
-        v.a = v.a + H_d[0];
-        v.b = v.b + H_d[1];
-        v.c = v.c + H_d[2];
-        v.d = v.d + H_d[3];
-        v.e = v.e + H_d[4];
-        v.f = v.f + H_d[5];
-        v.g = v.g + H_d[6];
-        v.h = v.h + H_d[7];
-
-        v.iter = 0;
-        v.state = IDLE;
-        v.ready = 1;
-
-      end else begin
-
-        v.iter  = v.iter + 1;
-        v.ready = 0;
-
-      end
+      v.state = IDLE;
+      v.ready = 1;
 
     end
 
@@ -323,10 +314,8 @@ module sha512 (
   end
 
   always_ff @(posedge clk) begin
-    W_q <= W_d;
     D_q <= D_d;
     H_q <= H_d;
-    T_q <= T_d;
   end
 
 endmodule

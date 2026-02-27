@@ -6,6 +6,6 @@ This algorithm is implemented in finite state machine.
 
 | Algorithm  | SHA256 | SHA512 |
 |:-----------|:------:|:------:|
-| LUT        | 3403   | 7692   |
-| FF         | 3138   | 7290   |
+| LUT        | 3172   | 7896   |
+| FF         | 2617   | 6224   |
 | BRAM       | 0      | 1      |
