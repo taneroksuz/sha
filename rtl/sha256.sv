@@ -193,32 +193,24 @@ module sha256 (
       if (Enable == 1) begin
 
         if (Index == 1) begin
-          H_d[0] = 32'H6A09E667;
-          H_d[1] = 32'HBB67AE85;
-          H_d[2] = 32'H3C6EF372;
-          H_d[3] = 32'HA54FF53A;
-          H_d[4] = 32'H510E527F;
-          H_d[5] = 32'H9B05688C;
-          H_d[6] = 32'H1F83D9AB;
-          H_d[7] = 32'H5BE0CD19;
-          v.a = H_d[0];
-          v.b = H_d[1];
-          v.c = H_d[2];
-          v.d = H_d[3];
-          v.e = H_d[4];
-          v.f = H_d[5];
-          v.g = H_d[6];
-          v.h = H_d[7];
-        end else begin
-          H_d[0] = v.a;
-          H_d[1] = v.b;
-          H_d[2] = v.c;
-          H_d[3] = v.d;
-          H_d[4] = v.e;
-          H_d[5] = v.f;
-          H_d[6] = v.g;
-          H_d[7] = v.h;
+          v.a = 32'H6A09E667;
+          v.b = 32'HBB67AE85;
+          v.c = 32'H3C6EF372;
+          v.d = 32'HA54FF53A;
+          v.e = 32'H510E527F;
+          v.f = 32'H9B05688C;
+          v.g = 32'H1F83D9AB;
+          v.h = 32'H5BE0CD19;
         end
+
+        H_d[0] = v.a;
+        H_d[1] = v.b;
+        H_d[2] = v.c;
+        H_d[3] = v.d;
+        H_d[4] = v.e;
+        H_d[5] = v.f;
+        H_d[6] = v.g;
+        H_d[7] = v.h;
 
         for (int i = 0; i < 16; i = i + 1) begin
           D_d[i] = Data[i*32+:32];

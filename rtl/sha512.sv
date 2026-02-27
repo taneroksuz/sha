@@ -209,32 +209,24 @@ module sha512 (
       if (Enable == 1) begin
 
         if (Index == 1) begin
-          H_d[0] = 64'H6A09E667F3BCC908;
-          H_d[1] = 64'HBB67AE8584CAA73B;
-          H_d[2] = 64'H3C6EF372FE94F82B;
-          H_d[3] = 64'HA54FF53A5F1D36F1;
-          H_d[4] = 64'H510E527FADE682D1;
-          H_d[5] = 64'H9B05688C2B3E6C1F;
-          H_d[6] = 64'H1F83D9ABFB41BD6B;
-          H_d[7] = 64'H5BE0CD19137E2179;
-          v.a = H_d[0];
-          v.b = H_d[1];
-          v.c = H_d[2];
-          v.d = H_d[3];
-          v.e = H_d[4];
-          v.f = H_d[5];
-          v.g = H_d[6];
-          v.h = H_d[7];
-        end else begin
-          H_d[0] = v.a;
-          H_d[1] = v.b;
-          H_d[2] = v.c;
-          H_d[3] = v.d;
-          H_d[4] = v.e;
-          H_d[5] = v.f;
-          H_d[6] = v.g;
-          H_d[7] = v.h;
+          v.a = 64'H6A09E667F3BCC908;
+          v.b = 64'HBB67AE8584CAA73B;
+          v.c = 64'H3C6EF372FE94F82B;
+          v.d = 64'HA54FF53A5F1D36F1;
+          v.e = 64'H510E527FADE682D1;
+          v.f = 64'H9B05688C2B3E6C1F;
+          v.g = 64'H1F83D9ABFB41BD6B;
+          v.h = 64'H5BE0CD19137E2179;
         end
+
+        H_d[0] = v.a;
+        H_d[1] = v.b;
+        H_d[2] = v.c;
+        H_d[3] = v.d;
+        H_d[4] = v.e;
+        H_d[5] = v.f;
+        H_d[6] = v.g;
+        H_d[7] = v.h;
 
         for (int i = 0; i < 16; i = i + 1) begin
           D_d[i] = Data[i*64+:64];
