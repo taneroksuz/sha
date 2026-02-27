@@ -70,7 +70,6 @@ void compare(uint8_t *in,uint8_t *out, int num)
 int main(int argc, char *argv[])
 {
     ifstream data_file("./out/plaintext.hex", fstream::in);
-    ifstream sha1_hash_file("./out/sha1.hex", fstream::in);
     ifstream sha256_hash_file("./out/sha256.hex", fstream::in);
     ifstream sha512_hash_file("./out/sha512.hex", fstream::in);
 
@@ -85,19 +84,7 @@ int main(int argc, char *argv[])
 
     SHA *s = new SHA();
 
-    int K = 20;
-
-    uint8_t *sha1_hash = (uint8_t *) malloc(K*sizeof(uint8_t));
-    uint8_t *sha1_res = (uint8_t *) malloc(K*sizeof(uint8_t));
-
-    string sha1_hash_str;
-
-    getline(sha1_hash_file,sha1_hash_str);
-    get(sha1_hash_str,sha1_hash,K);
-    s->SHA1(data,D,sha1_res);
-    compare(sha1_res,sha1_hash,K);
-
-    K = 32;
+    int K = 32;
 
     uint8_t *sha256_hash = (uint8_t *) malloc(K*sizeof(uint8_t));
     uint8_t *sha256_res = (uint8_t *) malloc(K*sizeof(uint8_t));

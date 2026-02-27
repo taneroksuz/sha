@@ -34,7 +34,6 @@ usage() {
     echo "  plaintext.bin       raw random binary"
     echo "  plaintext.hex       raw hex string (no spaces)"
     echo "  plaintext.txt       xxd formatted dump (offset + hex + ASCII)"
-    echo "  sha1.hex            SHA-1   digest hex"
     echo "  sha256.hex          SHA-256 digest hex"
     echo "  sha512.hex          SHA-512 digest hex"
     echo "  hashes.txt          all three digests together"
@@ -57,7 +56,6 @@ OUT_DIR="./out"
 PLAIN_BIN="${OUT_DIR}/plaintext.bin"    # raw binary
 PLAIN_HEX="${OUT_DIR}/plaintext.hex"    # hex string
 PLAIN_TXT="${OUT_DIR}/plaintext.txt"    # xxd dump
-SHA1_HEX="${OUT_DIR}/sha1.hex"          # SHA-1   digest
 SHA256_HEX="${OUT_DIR}/sha256.hex"      # SHA-256 digest
 SHA512_HEX="${OUT_DIR}/sha512.hex"      # SHA-512 digest
 HASH_FILE="${OUT_DIR}/hashes.txt"       # combined summary
@@ -135,12 +133,10 @@ echo -e "  ${YELLOW}$(cat "${PLAIN_HEX}")${RESET}"
 # =============================================================================
 section "Step 4: Compute SHA hash sums"
 
-SHA1_HASH=$(openssl dgst -sha1   "${PLAIN_BIN}" | awk '{print $2}')
 SHA256_HASH=$(openssl dgst -sha256 "${PLAIN_BIN}" | awk '{print $2}')
 SHA512_HASH=$(openssl dgst -sha512 "${PLAIN_BIN}" | awk '{print $2}')
 
 # Individual .hex files — just the bare digest string
-echo -n "${SHA1_HASH}"   > "${SHA1_HEX}"
 echo -n "${SHA256_HASH}" > "${SHA256_HEX}"
 echo -n "${SHA512_HASH}" > "${SHA512_HEX}"
 
@@ -150,17 +146,14 @@ echo -n "${SHA512_HASH}" > "${SHA512_HEX}"
     echo "# File size:        ${PLAINTEXT_BYTES} bytes"
     echo "# Generated:        $(date -u '+%Y-%m-%dT%H:%M:%SZ')"
     echo ""
-    printf "SHA-1    (160-bit):  %s\n" "${SHA1_HASH}"
     printf "SHA-256  (256-bit):  %s\n" "${SHA256_HASH}"
     printf "SHA-512  (512-bit):  %s\n" "${SHA512_HASH}"
 } > "${HASH_FILE}"
 
-ok "sha1.hex    ->  ${SHA1_HEX}"
 ok "sha256.hex  ->  ${SHA256_HEX}"
 ok "sha512.hex  ->  ${SHA512_HEX}"
 ok "hashes.txt  ->  ${HASH_FILE}"
 echo ""
-printf "  ${MAGENTA}SHA-1    ${RESET}(160-bit)\n  %s\n\n" "${SHA1_HASH}"
 printf "  ${MAGENTA}SHA-256  ${RESET}(256-bit)\n  %s\n\n" "${SHA256_HASH}"
 printf "  ${MAGENTA}SHA-512  ${RESET}(512-bit)\n  %s\n"   "${SHA512_HASH}"
 
@@ -187,7 +180,6 @@ check_hash() {
     fi
 }
 
-check_hash "sha1"   "${PLAIN_BIN}" "${SHA1_HEX}"
 check_hash "sha256" "${PLAIN_BIN}" "${SHA256_HEX}"
 check_hash "sha512" "${PLAIN_BIN}" "${SHA512_HEX}"
 
@@ -202,14 +194,12 @@ echo    "  ───────────────────────
 printf  "  %-28s  %s\n" "${PLAIN_BIN}"  "raw random binary (${PLAINTEXT_BYTES} bytes)"
 printf  "  %-28s  %s\n" "${PLAIN_HEX}"  "plaintext as hex string"
 printf  "  %-28s  %s\n" "${PLAIN_TXT}"  "xxd annotated dump"
-printf  "  %-28s  %s\n" "${SHA1_HEX}"   "SHA-1   (160-bit) digest"
 printf  "  %-28s  %s\n" "${SHA256_HEX}" "SHA-256 (256-bit) digest"
 printf  "  %-28s  %s\n" "${SHA512_HEX}" "SHA-512 (512-bit) digest"
 printf  "  %-28s  %s\n" "${HASH_FILE}"  "all three digests combined"
 echo ""
 echo -e "  ${BOLD}Algorithm   Digest size   Hash${RESET}"
 echo    "  ─────────────────────────────────────────────────────────────────────────────────────"
-printf  "  SHA-1       160-bit       %s\n" "${SHA1_HASH}"
 printf  "  SHA-256     256-bit       %s\n" "${SHA256_HASH}"
 printf  "  SHA-512     512-bit       %s\n" "${SHA512_HASH}"
 echo ""

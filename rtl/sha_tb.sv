@@ -10,12 +10,6 @@ module sha_tb;
 
   logic          rst;
 
-  logic [ 511:0] sha1_data;
-  logic [  63:0] sha1_index;
-  logic          sha1_enable;
-  logic [ 159:0] sha1_hash;
-  logic          sha1_ready;
-
   logic [ 511:0] sha256_data;
   logic [  63:0] sha256_index;
   logic [   1:0] sha256_op;
@@ -29,16 +23,6 @@ module sha_tb;
   logic          sha512_enable;
   logic [ 511:0] sha512_hash;
   logic          sha512_ready;
-
-  sha1 u_sha1 (
-      .rst(rst),
-      .clk(clk),
-      .Data(sha1_data),
-      .Index(sha1_index),
-      .Enable(sha1_enable),
-      .Hash(sha1_hash),
-      .Ready(sha1_ready)
-  );
 
   sha256 u_sha256 (
       .rst(rst),
@@ -64,13 +48,11 @@ module sha_tb;
 
   integer errors;
   integer pt_bytes;
-  integer sha1256_padded, sha512_padded;
-  integer sha1_blocks, sha256_blocks, sha512_blocks;
+  integer sha256_padded, sha512_padded;
+  integer sha256_blocks, sha512_blocks;
 
-  reg [7:0] sha1_exp  [];
   reg [7:0] sha256_exp[];
   reg [7:0] sha512_exp[];
-  reg [7:0] sha1_res  [];
   reg [7:0] sha256_res[];
   reg [7:0] sha512_res[];
 
@@ -107,7 +89,7 @@ module sha_tb;
     $fclose(f);
   endtask
 
-  task automatic pad_sha1256(input integer msg_len, input integer padded_len);
+  task automatic pad_sha256(input integer msg_len, input integer padded_len);
     longint bit_len;
     data = new[padded_len];
     for (int i = 0; i < msg_len; i++) data[i] = raw[i];
@@ -126,24 +108,6 @@ module sha_tb;
     for (int i = 0; i < 8; i++) data512[padded_len-16+i] = 8'h00;
     bit_len = longint'(msg_len) * 8;
     for (int i = 0; i < 8; i++) data512[padded_len-8+i] = 8'((bit_len >> (56 - i * 8)) & 8'hFF);
-  endtask
-
-  task automatic compare20(input string label);
-    reg match;
-    match = 1;
-    for (int i = 0; i < 20; i++)
-      if (sha1_res[i] !== sha1_exp[i]) begin
-        match = 0;
-        break;
-      end
-    $write("%s HASH: ", label);
-    for (int i = 0; i < 20; i++) $write("%02h", sha1_res[i]);
-    $write("\n%s ORIG: ", label);
-    for (int i = 0; i < 20; i++) $write("%02h", sha1_exp[i]);
-    $write("\n");
-    if (match) $display("%s TEST SUCCEEDED", label);
-    else $display("%s TEST FAILED", label);
-    if (!match) errors++;
   endtask
 
   task automatic compare32(input string label);
@@ -180,91 +144,6 @@ module sha_tb;
     if (match) $display("%s TEST SUCCEEDED", label);
     else $display("%s TEST FAILED", label);
     if (!match) errors++;
-  endtask
-
-  task automatic feed_sha1(input integer blocks);
-    integer blk, timeout;
-    for (blk = 0; blk < blocks; blk++) begin
-      @(posedge clk);
-      sha1_data = {
-        data[blk*64+60],
-        data[blk*64+61],
-        data[blk*64+62],
-        data[blk*64+63],
-        data[blk*64+56],
-        data[blk*64+57],
-        data[blk*64+58],
-        data[blk*64+59],
-        data[blk*64+52],
-        data[blk*64+53],
-        data[blk*64+54],
-        data[blk*64+55],
-        data[blk*64+48],
-        data[blk*64+49],
-        data[blk*64+50],
-        data[blk*64+51],
-        data[blk*64+44],
-        data[blk*64+45],
-        data[blk*64+46],
-        data[blk*64+47],
-        data[blk*64+40],
-        data[blk*64+41],
-        data[blk*64+42],
-        data[blk*64+43],
-        data[blk*64+36],
-        data[blk*64+37],
-        data[blk*64+38],
-        data[blk*64+39],
-        data[blk*64+32],
-        data[blk*64+33],
-        data[blk*64+34],
-        data[blk*64+35],
-        data[blk*64+28],
-        data[blk*64+29],
-        data[blk*64+30],
-        data[blk*64+31],
-        data[blk*64+24],
-        data[blk*64+25],
-        data[blk*64+26],
-        data[blk*64+27],
-        data[blk*64+20],
-        data[blk*64+21],
-        data[blk*64+22],
-        data[blk*64+23],
-        data[blk*64+16],
-        data[blk*64+17],
-        data[blk*64+18],
-        data[blk*64+19],
-        data[blk*64+12],
-        data[blk*64+13],
-        data[blk*64+14],
-        data[blk*64+15],
-        data[blk*64+8],
-        data[blk*64+9],
-        data[blk*64+10],
-        data[blk*64+11],
-        data[blk*64+4],
-        data[blk*64+5],
-        data[blk*64+6],
-        data[blk*64+7],
-        data[blk*64+0],
-        data[blk*64+1],
-        data[blk*64+2],
-        data[blk*64+3]
-      };
-      sha1_index = 64'(blk) + 1;
-      sha1_enable = 1;
-      @(posedge clk);
-      sha1_enable = 0;
-      timeout = 0;
-      while (!sha1_ready) begin
-        @(posedge clk);
-        if (++timeout >= WATCHDOG) begin
-          $display("[SHA1] WATCHDOG timeout at block %0d", blk);
-          $finish;
-        end
-      end
-    end
   endtask
 
   task automatic feed_sha256(input integer blocks);
@@ -509,39 +388,30 @@ module sha_tb;
       $finish;
     end
 
-    sha1256_padded = ((pt_bytes + 9  + 63)  / 64)  * 64;
-    sha512_padded  = ((pt_bytes + 17 + 127) / 128) * 128;
-    sha1_blocks    = sha1256_padded / 64;
-    sha256_blocks  = sha1256_padded / 64;
-    sha512_blocks  = sha512_padded  / 128;
+    sha256_padded = ((pt_bytes + 9 + 63) / 64) * 64;
+    sha512_padded = ((pt_bytes + 17 + 127) / 128) * 128;
+    sha256_blocks = sha256_padded / 64;
+    sha512_blocks = sha512_padded / 128;
 
     get_bytes("plaintext.hex", raw, pt_bytes);
-    sha1_exp   = new[20];
     sha256_exp = new[32];
     sha512_exp = new[64];
-    get_bytes("sha1.hex", sha1_exp, 20);
     get_bytes("sha256.hex", sha256_exp, 32);
     get_bytes("sha512.hex", sha512_exp, 64);
 
-    pad_sha1256(pt_bytes, sha1256_padded);
+    pad_sha256(pt_bytes, sha256_padded);
     pad_sha512(pt_bytes, sha512_padded);
 
-    $display("[TB] plaintext: %0d bytes -> SHA1/256 blocks: %0d, SHA512 blocks: %0d", pt_bytes,
-             sha1_blocks, sha512_blocks);
+    $display("[TB] plaintext: %0d bytes -> SHA256 blocks: %0d, SHA512 blocks: %0d", pt_bytes,
+             sha256_blocks, sha512_blocks);
 
     errors        = 0;
-    sha1_enable   = 0;
     sha256_enable = 0;
     sha512_enable = 0;
     rst           = 0;
     repeat (4) @(posedge clk);
     rst = 1;
     repeat (2) @(posedge clk);
-
-    sha1_res = new[20];
-    feed_sha1(sha1_blocks);
-    for (int i = 0; i < 20; i++) sha1_res[i] = sha1_hash[159-i*8-:8];
-    compare20("[SHA1]  ");
 
     sha256_res = new[32];
     feed_sha256(sha256_blocks);

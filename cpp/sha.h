@@ -43,8 +43,6 @@ class SHA
 
   public:
 
-    void SHA1(uint8_t *in, int length, uint8_t *out);
-
     void SHA224(uint8_t *in, int length, uint8_t *out);
 
     void SHA256(uint8_t *in, int length, uint8_t *out);

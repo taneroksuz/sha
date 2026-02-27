@@ -340,63 +340,6 @@ template <class T> void SHA::SHA_ALGORITHM(int N, T *H, T *M, T *K)
     }
 }
 
-void SHA::SHA1(uint8_t *in, int length, uint8_t *out)
-{
-    int N;
-    uint32_t *M;
-    uint32_t W[80];
-    uint32_t H[5] = {H_1[0],H_1[1],H_1[2],H_1[3],H_1[4]};
-
-    N = massage_block(in,length,&M);
-
-    for (int i=0; i<N; i++)
-    {
-        for (int t=0; t<80; t++)
-        {
-            if (t<16)
-            {
-                W[t] = M[16*i+t];
-            }
-            else
-            {
-                W[t] = ROTL((W[t-3] ^ W[t-8] ^ W[t-14] ^ W[t-16]),1);
-            }
-        }
-
-        uint32_t a = H[0];
-        uint32_t b = H[1];
-        uint32_t c = H[2];
-        uint32_t d = H[3];
-        uint32_t e = H[4];
-
-        for (int t=0; t<80; t++)
-        {
-            uint32_t T = ROTL(a,5) + f(b,c,d,t) + e + K_1(t) + W[t];
-            e = d;
-            d = c;
-            c = ROTL(b,30);
-            b = a;
-            a = T;
-        }
-
-        H[0] = a + H[0];
-        H[1] = b + H[1];
-        H[2] = c + H[2];
-        H[3] = d + H[3];
-        H[4] = e + H[4];
-    }
-
-    for (int i=0; i<5; i++)
-    {
-        out[4*i] = (H[i] >> 24) & 0xFF;
-        out[4*i+1] = (H[i] >> 16) & 0xFF;
-        out[4*i+2] = (H[i] >> 8)  & 0xFF;
-        out[4*i+3] = H[i]  & 0xFF;
-    }
-
-    free(M);
-}
-
 void SHA::SHA224(uint8_t *in, int length, uint8_t *out)
 {
     int N;
