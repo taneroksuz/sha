@@ -87,28 +87,6 @@ module sha256 (
       32'HC67178F2
   };
 
-  localparam logic [31 : 0] H_224[0:7] = '{
-      32'HC1059ED8,
-      32'H367CD507,
-      32'H3070DD17,
-      32'HF70E5939,
-      32'HFFC00B31,
-      32'H68581511,
-      32'H64F98FA7,
-      32'HBEFA4FA4
-  };
-
-  localparam logic [31 : 0] H_256[0:7] = '{
-      32'H6A09E667,
-      32'HBB67AE85,
-      32'H3C6EF372,
-      32'HA54FF53A,
-      32'H510E527F,
-      32'H9B05688C,
-      32'H1F83D9AB,
-      32'H5BE0CD19
-  };
-
   localparam IDLE = 2'h0;
   localparam INIT = 2'h1;
   localparam STOP = 2'h2;
@@ -217,9 +195,23 @@ module sha256 (
 
         if (Index == 1) begin
           if (Operation == 0) begin
-            H_d = H_224;
+            H_d[0] = 32'HC1059ED8;
+            H_d[1] = 32'H367CD507;
+            H_d[2] = 32'H3070DD17;
+            H_d[3] = 32'HF70E5939;
+            H_d[4] = 32'HFFC00B31;
+            H_d[5] = 32'H68581511;
+            H_d[6] = 32'H64F98FA7;
+            H_d[7] = 32'HBEFA4FA4;
           end else if (Operation == 1) begin
-            H_d = H_256;
+            H_d[0] = 32'H6A09E667;
+            H_d[1] = 32'HBB67AE85;
+            H_d[2] = 32'H3C6EF372;
+            H_d[3] = 32'HA54FF53A;
+            H_d[4] = 32'H510E527F;
+            H_d[5] = 32'H9B05688C;
+            H_d[6] = 32'H1F83D9AB;
+            H_d[7] = 32'H5BE0CD19;
           end
         end else begin
           H_d[0] = v.a;

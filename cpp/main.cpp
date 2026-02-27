@@ -49,16 +49,33 @@ void compare(uint8_t *in,uint8_t *out, int num)
             break;
         }
     }
-    printf("\x1B[1;34mHASH:\x1B[0m ");
-    for (int i=0; i<num; i=i+1)
+    if (num == 32)
     {
-        printf("%02x",in[i]);
+        printf("\x1B[1;34m[SHA256] HASH:\x1B[0m ");
+        for (int i=0; i<num; i=i+1)
+        {
+            printf("%02x",in[i]);
+        }
+        printf("\n");
+        printf("\x1B[1;34m[SHA256] ORIG:\x1B[0m ");
+        for (int i=0; i<num; i=i+1)
+        {
+            printf("%02x",out[i]);
+        }
     }
-    printf("\n");
-    printf("\x1B[1;34mORIG:\x1B[0m ");
-    for (int i=0; i<num; i=i+1)
+    else
     {
-        printf("%02x",out[i]);
+        printf("\x1B[1;34m[SHA512] HASH:\x1B[0m ");
+        for (int i=0; i<num; i=i+1)
+        {
+            printf("%02x",in[i]);
+        }
+        printf("\n");
+        printf("\x1B[1;34m[SHA512] ORIG:\x1B[0m ");
+        for (int i=0; i<num; i=i+1)
+        {
+            printf("%02x",out[i]);
+        }
     }
     printf("\n");
     if (res)
