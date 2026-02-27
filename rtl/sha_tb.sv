@@ -12,14 +12,12 @@ module sha_tb;
 
   logic [ 511:0] sha256_data;
   logic [  63:0] sha256_index;
-  logic [   1:0] sha256_op;
   logic          sha256_enable;
   logic [ 255:0] sha256_hash;
   logic          sha256_ready;
 
   logic [1023:0] sha512_data;
   logic [ 127:0] sha512_index;
-  logic [   1:0] sha512_op;
   logic          sha512_enable;
   logic [ 511:0] sha512_hash;
   logic          sha512_ready;
@@ -29,7 +27,6 @@ module sha_tb;
       .clk(clk),
       .Data(sha256_data),
       .Index(sha256_index),
-      .Operation(sha256_op),
       .Enable(sha256_enable),
       .Hash(sha256_hash),
       .Ready(sha256_ready)
@@ -40,7 +37,6 @@ module sha_tb;
       .clk(clk),
       .Data(sha512_data),
       .Index(sha512_index),
-      .Operation(sha512_op),
       .Enable(sha512_enable),
       .Hash(sha512_hash),
       .Ready(sha512_ready)
@@ -148,7 +144,6 @@ module sha_tb;
 
   task automatic feed_sha256(input integer blocks);
     integer blk, timeout;
-    sha256_op = 2'd1;
     for (blk = 0; blk < blocks; blk++) begin
       @(posedge clk);
       sha256_data = {
@@ -234,7 +229,6 @@ module sha_tb;
 
   task automatic feed_sha512(input integer blocks);
     integer blk, timeout;
-    sha512_op = 2'd3;
     for (blk = 0; blk < blocks; blk++) begin
       @(posedge clk);
       sha512_data = {

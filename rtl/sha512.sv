@@ -3,7 +3,6 @@ module sha512 (
     input logic clk,
     input logic [1023:0] Data,
     input logic [127:0] Index,
-    input logic [1:0] Operation,
     input logic [0:0] Enable,
     output logic [511:0] Hash,
     output logic [0:0] Ready
@@ -210,43 +209,14 @@ module sha512 (
       if (Enable == 1) begin
 
         if (Index == 1) begin
-          if (Operation == 0) begin
-            H_d[0] = 64'h8C3D37C819544DA2;
-            H_d[1] = 64'h73E1996689DCD4D6;
-            H_d[2] = 64'h1DFAB7AE32FF9C82;
-            H_d[3] = 64'h679DD514582F9FCF;
-            H_d[4] = 64'h0F6D2B697BD44DA8;
-            H_d[5] = 64'h77E36F7304C48942;
-            H_d[6] = 64'h3F9D85A86A1D36C8;
-            H_d[7] = 64'h1112E6AD91D692A1;
-          end else if (Operation == 1) begin
-            H_d[0] = 64'h22312194FC2BF72C;
-            H_d[1] = 64'h9F555FA3C84C64C2;
-            H_d[2] = 64'h2393B86B6F53B151;
-            H_d[3] = 64'h963877195940EABD;
-            H_d[4] = 64'h96283EE2A88EFFE3;
-            H_d[5] = 64'hBE5E1E2553863992;
-            H_d[6] = 64'h2B0199FC2C85B8AA;
-            H_d[7] = 64'h0EB72DDC81C52CA2;
-          end else if (Operation == 2) begin
-            H_d[0] = 64'HCBBB9D5DC1059ED8;
-            H_d[1] = 64'H629A292A367CD507;
-            H_d[2] = 64'H9159015A3070DD17;
-            H_d[3] = 64'H152FECD8F70E5939;
-            H_d[4] = 64'H67332667FFC00B31;
-            H_d[5] = 64'H8EB44A8768581511;
-            H_d[6] = 64'HDB0C2E0D64F98FA7;
-            H_d[7] = 64'H47B5481DBEFA4FA4;
-          end else if (Operation == 3) begin
-            H_d[0] = 64'H6A09E667F3BCC908;
-            H_d[1] = 64'HBB67AE8584CAA73B;
-            H_d[2] = 64'H3C6EF372FE94F82B;
-            H_d[3] = 64'HA54FF53A5F1D36F1;
-            H_d[4] = 64'H510E527FADE682D1;
-            H_d[5] = 64'H9B05688C2B3E6C1F;
-            H_d[6] = 64'H1F83D9ABFB41BD6B;
-            H_d[7] = 64'H5BE0CD19137E2179;
-          end
+          H_d[0] = 64'H6A09E667F3BCC908;
+          H_d[1] = 64'HBB67AE8584CAA73B;
+          H_d[2] = 64'H3C6EF372FE94F82B;
+          H_d[3] = 64'HA54FF53A5F1D36F1;
+          H_d[4] = 64'H510E527FADE682D1;
+          H_d[5] = 64'H9B05688C2B3E6C1F;
+          H_d[6] = 64'H1F83D9ABFB41BD6B;
+          H_d[7] = 64'H5BE0CD19137E2179;
         end else begin
           H_d[0] = v.a;
           H_d[1] = v.b;

@@ -30,16 +30,6 @@ uint64_t K_512[80] = {
 0x113f9804bef90dae, 0x1b710b35131c471b, 0x28db77f523047d84, 0x32caab7b40c72493, 0x3c9ebe0a15c9bebc,
 0x431d67c49c100d4c, 0x4cc5d4becb3e42b6, 0x597f299cfc657e2a, 0x5fcb6fab3ad6faec, 0x6c44198c4a475817};
 
-uint32_t H_224[8] = {
-0xc1059ed8,
-0x367cd507,
-0x3070dd17,
-0xf70e5939,
-0xffc00b31,
-0x68581511,
-0x64f98fa7,
-0xbefa4fa4};
-
 uint32_t H_256[8] = {
 0x6a09e667,
 0xbb67ae85,
@@ -50,16 +40,6 @@ uint32_t H_256[8] = {
 0x1f83d9ab,
 0x5be0cd19};
 
-uint64_t H_384[8] = {
-0xcbbb9d5dc1059ed8,
-0x629a292a367cd507,
-0x9159015a3070dd17,
-0x152fecd8f70e5939,
-0x67332667ffc00b31,
-0x8eb44a8768581511,
-0xdb0c2e0d64f98fa7,
-0x47b5481dbefa4fa4};
-
 uint64_t H_512[8] = {
 0x6a09e667f3bcc908,
 0xbb67ae8584caa73b,
@@ -69,26 +49,6 @@ uint64_t H_512[8] = {
 0x9b05688c2b3e6c1f,
 0x1f83d9abfb41bd6b,
 0x5be0cd19137e2179};
-
-uint64_t H_512_224[8] = {
-0x8C3D37C819544DA2,
-0x73E1996689DCD4D6,
-0x1DFAB7AE32FF9C82,
-0x679DD514582F9FCF,
-0x0F6D2B697BD44DA8,
-0x77E36F7304C48942,
-0x3F9D85A86A1D36C8,
-0x1112E6AD91D692A1};
-
-uint64_t H_512_256[8] = {
-0x22312194FC2BF72C,
-0x9F555FA3C84C64C2,
-0x2393B86B6F53B151,
-0x963877195940EABD,
-0x96283EE2A88EFFE3,
-0xBE5E1E2553863992,
-0x2B0199FC2C85B8AA,
-0x0EB72DDC81C52CA2};
 
 template <class T> T SHA::ROTL(T x, int n)
 {
@@ -194,26 +154,6 @@ template <class T> T SHA::sigma(T x, int t, int k)
         {
             return ROTR(x,19) ^ ROTR(x,61) ^ SHR(x,6);
         }
-    }
-}
-
-uint32_t SHA::K_1(int t)
-{
-    if (t >=0 && t<=19)
-    {
-        return 0x5a827999;
-    }
-    else if (t >=20 && t<=39)
-    {
-        return 0x6ed9eba1;
-    }
-    else if (t >=40 && t<=59)
-    {
-        return 0x8f1bbcdc;
-    }
-    else
-    {
-        return 0xca62c1d6;
     }
 }
 
@@ -333,27 +273,6 @@ template <class T> void SHA::SHA_ALGORITHM(int N, T *H, T *M, T *K)
     }
 }
 
-void SHA::SHA224(uint8_t *in, int length, uint8_t *out)
-{
-    int N;
-    uint32_t *M;
-    uint32_t H[8] = {H_224[0],H_224[1],H_224[2],H_224[3],H_224[4],H_224[5],H_224[6],H_224[7]};
-
-    N = massage_block(in,length,&M);
-
-    SHA_ALGORITHM(N,&H[0],&M[0],&K_256[0]);
-
-    for (int i=0; i<7; i++)
-    {
-        out[4*i] = (H[i] >> 24)  & 0xFF;
-        out[4*i+1] = (H[i] >> 16)  & 0xFF;
-        out[4*i+2] = (H[i] >> 8)  & 0xFF;
-        out[4*i+3] = H[i]  & 0xFF;
-    }
-
-    free(M);
-}
-
 void SHA::SHA256(uint8_t *in, int length, uint8_t *out)
 {
     int N;
@@ -376,31 +295,6 @@ void SHA::SHA256(uint8_t *in, int length, uint8_t *out)
     free(M);
 }
 
-void SHA::SHA384(uint8_t *in, int length, uint8_t *out)
-{
-    int N;
-    uint64_t *M;
-    uint64_t H[8] = {H_384[0],H_384[1],H_384[2],H_384[3],H_384[4],H_384[5],H_384[6],H_384[7]};
-
-    N = massage_block(in,length,&M);
-
-    SHA_ALGORITHM(N,&H[0],&M[0],&K_512[0]);
-
-    for (int i=0; i<6; i++)
-    {
-        out[8*i] = (H[i] >> 56)  & 0xFF;
-        out[8*i+1] = (H[i] >> 48)  & 0xFF;
-        out[8*i+2] = (H[i] >> 40)  & 0xFF;
-        out[8*i+3] = (H[i] >> 32)  & 0xFF;
-        out[8*i+4] = (H[i] >> 24)  & 0xFF;
-        out[8*i+5] = (H[i] >> 16)  & 0xFF;
-        out[8*i+6] = (H[i] >> 8)  & 0xFF;
-        out[8*i+7] = H[i]  & 0xFF;
-    }
-
-    free(M);
-}
-
 void SHA::SHA512(uint8_t *in, int length, uint8_t *out)
 {
     int N;
@@ -412,61 +306,6 @@ void SHA::SHA512(uint8_t *in, int length, uint8_t *out)
     SHA_ALGORITHM(N,&H[0],&M[0],&K_512[0]);
 
     for (int i=0; i<8; i++)
-    {
-        out[8*i] = (H[i] >> 56)  & 0xFF;
-        out[8*i+1] = (H[i] >> 48)  & 0xFF;
-        out[8*i+2] = (H[i] >> 40)  & 0xFF;
-        out[8*i+3] = (H[i] >> 32)  & 0xFF;
-        out[8*i+4] = (H[i] >> 24)  & 0xFF;
-        out[8*i+5] = (H[i] >> 16)  & 0xFF;
-        out[8*i+6] = (H[i] >> 8)  & 0xFF;
-        out[8*i+7] = H[i]  & 0xFF;
-    }
-
-    free(M);
-}
-
-void SHA::SHA512_224(uint8_t *in, int length, uint8_t *out)
-{
-    int N;
-    uint64_t *M;
-    uint64_t H[8] = {H_512_224[0],H_512_224[1],H_512_224[2],H_512_224[3],H_512_224[4],H_512_224[5],H_512_224[6],H_512_224[7]};
-
-    N = massage_block(in,length,&M);
-
-    SHA_ALGORITHM(N,&H[0],&M[0],&K_512[0]);
-
-    for (int i=0; i<3; i++)
-    {
-        out[8*i] = (H[i] >> 56)  & 0xFF;
-        out[8*i+1] = (H[i] >> 48)  & 0xFF;
-        out[8*i+2] = (H[i] >> 40)  & 0xFF;
-        out[8*i+3] = (H[i] >> 32)  & 0xFF;
-        out[8*i+4] = (H[i] >> 24)  & 0xFF;
-        out[8*i+5] = (H[i] >> 16)  & 0xFF;
-        out[8*i+6] = (H[i] >> 8)  & 0xFF;
-        out[8*i+7] = H[i]  & 0xFF;
-    }
-
-    out[24] = (H[3] >> 56)  & 0xFF;
-    out[25] = (H[3] >> 48)  & 0xFF;
-    out[26] = (H[3] >> 40)  & 0xFF;
-    out[27] = (H[3] >> 32)  & 0xFF;
-
-    free(M);
-}
-
-
-void SHA::SHA512_256(uint8_t *in, int length, uint8_t *out)
-{
-    int N;
-    uint64_t *M;
-    uint64_t H[8] = {H_512_256[0],H_512_256[1],H_512_256[2],H_512_256[3],H_512_256[4],H_512_256[5],H_512_256[6],H_512_256[7]};
-    N = massage_block(in,length,&M);
-
-    SHA_ALGORITHM(N,&H[0],&M[0],&K_512[0]);
-
-    for (int i=0; i<4; i++)
     {
         out[8*i] = (H[i] >> 56)  & 0xFF;
         out[8*i+1] = (H[i] >> 48)  & 0xFF;

@@ -3,7 +3,6 @@ module sha256 (
     input logic clk,
     input logic [511:0] Data,
     input logic [63:0] Index,
-    input logic [1:0] Operation,
     input logic [0:0] Enable,
     output logic [255:0] Hash,
     output logic [0:0] Ready
@@ -194,25 +193,14 @@ module sha256 (
       if (Enable == 1) begin
 
         if (Index == 1) begin
-          if (Operation == 0) begin
-            H_d[0] = 32'HC1059ED8;
-            H_d[1] = 32'H367CD507;
-            H_d[2] = 32'H3070DD17;
-            H_d[3] = 32'HF70E5939;
-            H_d[4] = 32'HFFC00B31;
-            H_d[5] = 32'H68581511;
-            H_d[6] = 32'H64F98FA7;
-            H_d[7] = 32'HBEFA4FA4;
-          end else if (Operation == 1) begin
-            H_d[0] = 32'H6A09E667;
-            H_d[1] = 32'HBB67AE85;
-            H_d[2] = 32'H3C6EF372;
-            H_d[3] = 32'HA54FF53A;
-            H_d[4] = 32'H510E527F;
-            H_d[5] = 32'H9B05688C;
-            H_d[6] = 32'H1F83D9AB;
-            H_d[7] = 32'H5BE0CD19;
-          end
+          H_d[0] = 32'H6A09E667;
+          H_d[1] = 32'HBB67AE85;
+          H_d[2] = 32'H3C6EF372;
+          H_d[3] = 32'HA54FF53A;
+          H_d[4] = 32'H510E527F;
+          H_d[5] = 32'H9B05688C;
+          H_d[6] = 32'H1F83D9AB;
+          H_d[7] = 32'H5BE0CD19;
         end else begin
           H_d[0] = v.a;
           H_d[1] = v.b;
