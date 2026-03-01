@@ -30,100 +30,87 @@ void get(string in,uint8_t *out, int num)
     }
 }
 
-void get_string(string in,uint8_t *out, int num)
-{
-    for (int i=0; i<num; i=i+1)
-    {
-        out[i] = (uint8_t) in[i];
-    }
-}
 
-void compare(uint8_t *in,uint8_t *out, int num)
+void compare(uint8_t *computed, uint8_t *expected, int num, const char *label)
 {
     bool res = true;
-    for (int i=0; i<num; i=i+1)
+    for (int i = 0; i < num; i++)
     {
-        if (in[i] != out[i])
+        if (computed[i] != expected[i])
         {
             res = false;
             break;
         }
     }
-    if (num == 32)
-    {
-        printf("\x1B[1;34m[SHA256] HASH:\x1B[0m ");
-        for (int i=0; i<num; i=i+1)
-        {
-            printf("%02x",in[i]);
-        }
-        printf("\n");
-        printf("\x1B[1;34m[SHA256] ORIG:\x1B[0m ");
-        for (int i=0; i<num; i=i+1)
-        {
-            printf("%02x",out[i]);
-        }
-    }
-    else
-    {
-        printf("\x1B[1;34m[SHA512] HASH:\x1B[0m ");
-        for (int i=0; i<num; i=i+1)
-        {
-            printf("%02x",in[i]);
-        }
-        printf("\n");
-        printf("\x1B[1;34m[SHA512] ORIG:\x1B[0m ");
-        for (int i=0; i<num; i=i+1)
-        {
-            printf("%02x",out[i]);
-        }
-    }
+
+    printf("\x1B[1;34m[%s] HASH:\x1B[0m ", label);
+    for (int i = 0; i < num; i++)
+        printf("%02x", computed[i]);
     printf("\n");
+
+    printf("\x1B[1;34m[%s] ORIG:\x1B[0m ", label);
+    for (int i = 0; i < num; i++)
+        printf("%02x", expected[i]);
+    printf("\n");
+
     if (res)
         printf("\x1B[1;32mTEST SUCCEEDED\x1B[0m\n");
     else
         printf("\x1B[1;31mTEST FAILED\x1B[0m\n");
+
+    printf("\n");
 }
 
 int main(int argc, char *argv[])
 {
-    ifstream data_file("./out/plaintext.hex", fstream::in);
-    ifstream sha256_hash_file("./out/sha256.hex", fstream::in);
-    ifstream sha512_hash_file("./out/sha512.hex", fstream::in);
+    if (argc < 2)
+    {
+        fprintf(stderr, "Usage: %s <PLAINTEXT_BYTES>\n", argv[0]);
+        return 1;
+    }
 
     int D = atoi(argv[1]);
 
-    uint8_t *data = (uint8_t *) malloc(D*sizeof(uint8_t));
+    ifstream data_file       ("./out/plaintext.hex", fstream::in);
+    ifstream sha256_hash_file("./out/sha256.hex",    fstream::in);
+    ifstream sha512_hash_file("./out/sha512.hex",    fstream::in);
 
+    if (!data_file.is_open())        { fprintf(stderr, "Error: cannot open ./out/plaintext.hex\n"); return 1; }
+    if (!sha256_hash_file.is_open()) { fprintf(stderr, "Error: cannot open ./out/sha256.hex\n");    return 1; }
+    if (!sha512_hash_file.is_open()) { fprintf(stderr, "Error: cannot open ./out/sha512.hex\n");    return 1; }
+
+    uint8_t *data = (uint8_t *) malloc(D * sizeof(uint8_t));
     string data_str;
-
-    getline(data_file,data_str);
-    get(data_str,data,D);
+    getline(data_file, data_str);
+    get(data_str, data, D);
 
     SHA *s = new SHA();
 
-    int K = 32;
+    int K;
+    string hash_str;
+    uint8_t *hash_ref;
+    uint8_t *hash_res;
 
-    uint8_t *sha256_hash = (uint8_t *) malloc(K*sizeof(uint8_t));
-    uint8_t *sha256_res = (uint8_t *) malloc(K*sizeof(uint8_t));
+    K        = 32;
+    hash_ref = (uint8_t *) malloc(K * sizeof(uint8_t));
+    hash_res = (uint8_t *) malloc(K * sizeof(uint8_t));
+    getline(sha256_hash_file, hash_str);
+    get(hash_str, hash_ref, K);
+    s->SHA256(data, D, hash_res);
+    compare(hash_res, hash_ref, K, "SHA256");
+    free(hash_ref); free(hash_res);
 
-    string sha256_hash_str;
+    K        = 64;
+    hash_ref = (uint8_t *) malloc(K * sizeof(uint8_t));
+    hash_res = (uint8_t *) malloc(K * sizeof(uint8_t));
+    getline(sha512_hash_file, hash_str);
+    get(hash_str, hash_ref, K);
+    s->SHA512(data, D, hash_res);
+    compare(hash_res, hash_ref, K, "SHA512");
+    free(hash_ref); free(hash_res);
 
-    getline(sha256_hash_file,sha256_hash_str);
-    get(sha256_hash_str,sha256_hash,K);
-    s->SHA256(data,D,sha256_res);
-    compare(sha256_res,sha256_hash,K);
-
-    K = 64;
-
-    uint8_t *sha512_hash = (uint8_t *) malloc(K*sizeof(uint8_t));
-    uint8_t *sha512_res = (uint8_t *) malloc(K*sizeof(uint8_t));
-
-    string sha512_hash_str;
-
-    getline(sha512_hash_file,sha512_hash_str);
-    get(sha512_hash_str,sha512_hash,K);
-    s->SHA512(data,D,sha512_res);
-    compare(sha512_res,sha512_hash,K);
+    free(data);
+    delete s;
 
     return 0;
 }

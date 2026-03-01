@@ -1,5 +1,5 @@
-#ifndef AES_H
-#define AES_H
+#ifndef SHA_H
+#define SHA_H
 
 #include <cstdint>
 #include <cstdlib>

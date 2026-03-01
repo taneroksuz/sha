@@ -22,24 +22,28 @@ module sha_tb;
   logic [ 511:0] sha512_hash;
   logic          sha512_ready;
 
-  sha256 u_sha256 (
-      .rst(rst),
-      .clk(clk),
-      .Data(sha256_data),
-      .Index(sha256_index),
+  sha #(
+      .VARIANT(256)
+  ) u_sha256 (
+      .rst   (rst),
+      .clk   (clk),
+      .Data  (sha256_data),
+      .Index (sha256_index),
       .Enable(sha256_enable),
-      .Hash(sha256_hash),
-      .Ready(sha256_ready)
+      .Hash  (sha256_hash),
+      .Ready (sha256_ready)
   );
 
-  sha512 u_sha512 (
-      .rst(rst),
-      .clk(clk),
-      .Data(sha512_data),
-      .Index(sha512_index),
+  sha #(
+      .VARIANT(512)
+  ) u_sha512 (
+      .rst   (rst),
+      .clk   (clk),
+      .Data  (sha512_data),
+      .Index (sha512_index),
       .Enable(sha512_enable),
-      .Hash(sha512_hash),
-      .Ready(sha512_ready)
+      .Hash  (sha512_hash),
+      .Ready (sha512_ready)
   );
 
   integer errors;
@@ -92,7 +96,8 @@ module sha_tb;
     data[msg_len] = 8'h80;
     for (int i = msg_len + 1; i < padded_len - 8; i++) data[i] = 8'h00;
     bit_len = longint'(msg_len) * 8;
-    for (int i = 0; i < 8; i++) data[padded_len-8+i] = 8'((bit_len >> (56 - i * 8)) & 8'hFF);
+    for (int i = 0; i < 8; i++)
+      data[padded_len-8+i] = 8'((bit_len >> (56 - i * 8)) & longint'(8'hFF));
   endtask
 
   task automatic pad_sha512(input integer msg_len, input integer padded_len);
@@ -103,7 +108,8 @@ module sha_tb;
     for (int i = msg_len + 1; i < padded_len - 16; i++) data512[i] = 8'h00;
     for (int i = 0; i < 8; i++) data512[padded_len-16+i] = 8'h00;
     bit_len = longint'(msg_len) * 8;
-    for (int i = 0; i < 8; i++) data512[padded_len-8+i] = 8'((bit_len >> (56 - i * 8)) & 8'hFF);
+    for (int i = 0; i < 8; i++)
+      data512[padded_len-8+i] = 8'((bit_len >> (56 - i * 8)) & longint'(8'hFF));
   endtask
 
   task automatic compare32(input string label);
@@ -424,8 +430,8 @@ module sha_tb;
   end
 
   initial begin
-    $dumpfile("sha_tb.vcd");
-    $dumpvars(0, sha_tb);
+    $dumpfile("sha2_tb.vcd");
+    $dumpvars(0, sha2_tb);
   end
 
 endmodule
