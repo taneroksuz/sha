@@ -225,7 +225,8 @@ module sha_tb;
       timeout = 0;
       while (!sha256_ready) begin
         @(posedge clk);
-        if (++timeout >= WATCHDOG) begin
+        timeout++;
+        if (timeout >= WATCHDOG) begin
           $display("[SHA256] WATCHDOG timeout at block %0d", blk);
           $finish;
         end
@@ -374,7 +375,8 @@ module sha_tb;
       timeout = 0;
       while (!sha512_ready) begin
         @(posedge clk);
-        if (++timeout >= WATCHDOG) begin
+        timeout++;
+        if (timeout >= WATCHDOG) begin
           $display("[SHA512] WATCHDOG timeout at block %0d", blk);
           $finish;
         end

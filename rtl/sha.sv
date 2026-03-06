@@ -188,9 +188,6 @@ module sha #(
     logic [ITER_BITS-1:0] iter;
     logic [1:0]           state;
     logic [0:0]           ready;
-    logic [W-1:0]         swap;
-    logic [W-1:0]         swap1;
-    logic [W-1:0]         swap0;
     logic [W-1:0]         a;
     logic [W-1:0]         b;
     logic [W-1:0]         c;
@@ -205,9 +202,6 @@ module sha #(
       iter  : 0,
       state : IDLE,
       ready : 0,
-      swap  : 0,
-      swap1 : 0,
-      swap0 : 0,
       a     : 0,
       b     : 0,
       c     : 0,
@@ -223,6 +217,10 @@ module sha #(
 
   logic [W-1:0] D_q[0:ROUNDS-1];
   logic [W-1:0] H_q[0:7];
+
+  logic [W-1:0] D;
+  logic [W-1:0] T0;
+  logic [W-1:0] T1;
 
   reg_type r, rin;
   reg_type v;
@@ -299,6 +297,10 @@ module sha #(
     D_d = D_q;
     H_d = H_q;
 
+    D  = 0;
+    T0 = 0;
+    T1 = 0;
+
     if (r.state == IDLE) begin
 
       if (Enable == 1) begin
@@ -348,25 +350,25 @@ module sha #(
     end else if (r.state == INIT) begin
 
       if (v.iter < 16) begin
-        v.swap = D_d[v.iter];
+        D = D_d[v.iter];
       end else begin
-        v.swap = SMALLSIGMA(D_d[v.iter-2], 1) + D_d[v.iter-7] + SMALLSIGMA(D_d[v.iter-15], 0) +
+        D = SMALLSIGMA(D_d[v.iter-2], 1) + D_d[v.iter-7] + SMALLSIGMA(D_d[v.iter-15], 0) +
             D_d[v.iter-16];
       end
 
-      v.swap0 = v.h + BIGSIGMA(v.e, 1) + CH(v.e, v.f, v.g) + K_val(int'(v.iter)) + v.swap;
-      v.swap1 = BIGSIGMA(v.a, 0) + MAJ(v.a, v.b, v.c);
+      T0 = v.h + BIGSIGMA(v.e, 1) + CH(v.e, v.f, v.g) + K_val(int'(v.iter)) + D;
+      T1 = BIGSIGMA(v.a, 0) + MAJ(v.a, v.b, v.c);
 
       v.h = v.g;
       v.g = v.f;
       v.f = v.e;
-      v.e = v.d + v.swap0;
+      v.e = v.d + T0;
       v.d = v.c;
       v.c = v.b;
       v.b = v.a;
-      v.a = v.swap0 + v.swap1;
+      v.a = T0 + T1;
 
-      D_d[v.iter] = v.swap;
+      D_d[v.iter] = D;
 
       if (v.iter == ITER_BITS'(ROUNDS - 1)) begin
 
